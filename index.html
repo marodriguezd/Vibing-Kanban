@@ -1681,7 +1681,14 @@
             updateBoardSelector();
             renderBoardDropdown();
             setupHorizontalScroll();
+            renderBoardDropdown();
+            setupHorizontalScroll();
             setupClickOutside();
+
+            // Re-render on resize to update draggable state
+            window.addEventListener('resize', () => {
+                renderBoard();
+            });
         }
 
         // Load data from localStorage
@@ -1959,9 +1966,10 @@
 
         // Create card HTML
         function createCardHTML(task, menuIcon) {
+            const isMobile = window.innerWidth <= 768;
             return `
                 <div class="card" 
-                     draggable="true" 
+                     draggable="${!isMobile}" 
                      data-id="${task.id}"
                      ondragstart="handleDragStart(event, '${task.id}')"
                      ondragend="handleDragEnd(event)"
