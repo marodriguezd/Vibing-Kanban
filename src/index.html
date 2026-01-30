@@ -92,13 +92,35 @@
         }
 
         /* ============================================
+           MAIN CONTAINER - ALIGNED WITH BOARD
+           ============================================ */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-wrapper {
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        [data-theme="blocky"] .content-wrapper {
+            padding: 0;
+        }
+
+        /* ============================================
            HEADER
            ============================================ */
         .header {
             background-color: var(--bg-secondary);
             border-bottom: 1px solid var(--border-color);
             height: var(--header-height);
-            padding: 0 20px;
+            padding: 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -118,7 +140,12 @@
             min-width: 0;
         }
 
-        .logo {
+        /* Board Selector Dropdown */
+        .board-selector-wrapper {
+            position: relative;
+        }
+
+        .board-selector {
             font-size: 16px;
             font-weight: 600;
             color: var(--text-primary);
@@ -132,39 +159,187 @@
             transition: all 0.2s;
             white-space: nowrap;
             overflow: hidden;
+            background: var(--bg-secondary);
         }
 
-        [data-theme="blocky"] .logo {
+        [data-theme="blocky"] .board-selector {
             border-color: var(--border-color);
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-size: 14px;
         }
 
-        .logo:hover {
+        .board-selector:hover {
             background-color: var(--bg-primary);
             border-color: var(--border-color);
         }
 
-        [data-theme="blocky"] .logo:hover {
+        [data-theme="blocky"] .board-selector:hover {
             background-color: #000;
             color: #fff;
         }
 
-        .logo-icon {
+        .board-selector-icon {
             flex-shrink: 0;
             font-size: 18px;
         }
 
-        .logo-text {
+        .board-selector-text {
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .logo-arrow {
+        .board-selector-arrow {
             flex-shrink: 0;
             font-size: 10px;
             color: var(--text-muted);
             margin-left: 4px;
+            transition: transform 0.2s;
+        }
+
+        .board-selector-wrapper.active .board-selector-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Board Dropdown Menu */
+        .board-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            min-width: 250px;
+            max-width: 350px;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-hover);
+            z-index: 101;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        [data-theme="blocky"] .board-dropdown {
+            border-width: 2px;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .board-selector-wrapper.active .board-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .board-dropdown-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        [data-theme="blocky"] .board-dropdown-header {
+            border-bottom-width: 2px;
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .board-dropdown-list {
+            padding: 4px;
+        }
+
+        .board-dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        [data-theme="blocky"] .board-dropdown-item {
+            border-radius: 0;
+            font-size: 12px;
+        }
+
+        .board-dropdown-item:hover {
+            background-color: var(--bg-primary);
+        }
+
+        [data-theme="blocky"] .board-dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .board-dropdown-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--progress-dot);
+            font-weight: 600;
+        }
+
+        [data-theme="blocky"] .board-dropdown-item.active {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .board-dropdown-item-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .board-dropdown-item-name span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .board-dropdown-item-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .board-dropdown-item:hover .board-dropdown-item-actions {
+            opacity: 1;
+        }
+
+        .board-dropdown-add {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        [data-theme="blocky"] .board-dropdown-add {
+            border-top-width: 2px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .board-dropdown-add:hover {
+            background-color: var(--bg-primary);
+            color: var(--progress-dot);
+        }
+
+        [data-theme="blocky"] .board-dropdown-add:hover {
+            background-color: #000;
+            color: #fff;
         }
 
         .header-actions {
@@ -244,13 +419,13 @@
         }
 
         /* ============================================
-           BOARD CONTAINER - SCROLLABLE AREA
+           BOARD WRAPPER
            ============================================ */
         .board-wrapper {
             flex: 1;
             overflow-x: auto;
             overflow-y: hidden;
-            padding: 20px;
+            padding: 20px 0;
         }
 
         [data-theme="blocky"] .board-wrapper {
@@ -286,6 +461,7 @@
             border-bottom-width: 0;
             border-left-width: 2px;
             border-right-width: 0;
+            border-radius: 0;
         }
 
         [data-theme="blocky"] .column:first-child {
@@ -982,161 +1158,6 @@
             text-align: center;
         }
 
-        .board-list {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        [data-theme="blocky"] .board-list {
-            gap: 0;
-        }
-
-        .board-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 13px;
-            border: 1px solid transparent;
-        }
-
-        [data-theme="blocky"] .board-item {
-            border-color: var(--border-color);
-            border-width: 2px;
-            border-radius: 0;
-            border-bottom-width: 1px;
-        }
-
-        [data-theme="blocky"] .board-item:last-child {
-            border-bottom-width: 2px;
-        }
-
-        .board-item:hover {
-            background-color: var(--bg-primary);
-            border-color: var(--border-color);
-        }
-
-        [data-theme="blocky"] .board-item:hover {
-            background-color: #f0f0f0;
-        }
-
-        .board-item.active {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: var(--progress-dot);
-            font-weight: 600;
-            border-color: var(--progress-dot);
-        }
-
-        [data-theme="blocky"] .board-item.active {
-            background-color: #000;
-            color: #fff;
-            border-color: #000;
-        }
-
-        .board-item-name {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .board-item-name span {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .board-item-actions {
-            display: flex;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        [data-theme="blocky"] .board-item-actions {
-            opacity: 1;
-        }
-
-        .board-item:hover .board-item-actions {
-            opacity: 1;
-        }
-
-        .btn-small {
-            width: 24px;
-            height: 24px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-secondary);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: var(--text-muted);
-            transition: all 0.2s;
-        }
-
-        [data-theme="blocky"] .btn-small {
-            border-width: 2px;
-            border-radius: 0;
-            font-family: var(--font-mono);
-            font-size: 10px;
-        }
-
-        .btn-small:hover {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            border-color: var(--text-primary);
-        }
-
-        [data-theme="blocky"] .btn-small:hover {
-            background-color: #000;
-            color: #fff;
-            border-color: #000;
-        }
-
-        .add-board-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            border: 1px dashed var(--border-color);
-            background: transparent;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: 13px;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-            width: 100%;
-            margin-top: 8px;
-            font-family: var(--font-main);
-        }
-
-        [data-theme="blocky"] .add-board-btn {
-            border-style: solid;
-            border-width: 2px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 11px;
-        }
-
-        .add-board-btn:hover {
-            border-color: var(--progress-dot);
-            color: var(--progress-dot);
-            border-style: solid;
-        }
-
-        [data-theme="blocky"] .add-board-btn:hover {
-            background-color: #000;
-            color: #fff;
-            border-color: #000;
-        }
-
         /* ============================================
            CONTEXT MENU
            ============================================ */
@@ -1312,13 +1333,21 @@
                 display: block;
             }
 
-            .header {
+            .main-container {
+                display: block;
+            }
+
+            .content-wrapper {
                 padding: 0 12px;
+            }
+
+            .header {
+                padding: 0;
                 position: sticky;
                 top: 0;
             }
 
-            .logo {
+            .board-selector {
                 font-size: 14px;
                 padding: 6px 8px;
             }
@@ -1328,7 +1357,7 @@
             }
 
             .board-wrapper {
-                padding: 12px;
+                padding: 12px 0;
                 overflow-x: hidden;
                 overflow-y: visible;
             }
@@ -1389,6 +1418,14 @@
                 margin: 10px;
             }
 
+            .board-dropdown {
+                position: fixed;
+                top: var(--header-height);
+                left: 12px;
+                right: 12px;
+                max-width: none;
+            }
+
             .sidebar {
                 width: 100%;
                 right: -100%;
@@ -1429,28 +1466,46 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <div class="logo" onclick="openSidebar()">
-                <span class="logo-icon" id="logoIcon">📋</span>
-                <span class="logo-text" id="currentBoardName">Mi Tablero</span>
-                <span class="logo-arrow" id="logoArrow">▼</span>
-            </div>
-        </div>
-        <div class="header-actions">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Buscar tareas...">
-            </div>
-            <button class="btn-icon" title="Nueva tarea" onclick="openModal()" id="btnNew">+</button>
-            <button class="btn-icon" title="Menú" onclick="openSidebar()" id="btnMenu">☰</button>
-        </div>
-    </header>
+    <div class="main-container">
+        <div class="content-wrapper">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <!-- Board Selector Dropdown -->
+                    <div class="board-selector-wrapper" id="boardSelectorWrapper">
+                        <div class="board-selector" onclick="toggleBoardDropdown()">
+                            <span class="board-selector-icon" id="logoIcon">📋</span>
+                            <span class="board-selector-text" id="currentBoardName">Mi Tablero</span>
+                            <span class="board-selector-arrow" id="logoArrow">▼</span>
+                        </div>
+                        <!-- Dropdown Menu -->
+                        <div class="board-dropdown" id="boardDropdown">
+                            <div class="board-dropdown-header" id="dropdownHeader">Mis Tableros</div>
+                            <div class="board-dropdown-list" id="boardDropdownList">
+                                <!-- Boards will be generated by JS -->
+                            </div>
+                            <div class="board-dropdown-add" onclick="createNewBoardFromDropdown()">
+                                <span id="dropdownAddIcon">+</span>
+                                <span id="dropdownAddText">Nuevo tablero</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Buscar tareas...">
+                    </div>
+                    <button class="btn-icon" title="Nueva tarea" onclick="openModal()" id="btnNew">+</button>
+                    <button class="btn-icon" title="Menú" onclick="openSidebar()" id="btnMenu">☰</button>
+                </div>
+            </header>
 
-    <!-- Board Wrapper - Scrollable Area -->
-    <div class="board-wrapper" id="boardWrapper">
-        <div class="board" id="board">
-            <!-- Columns will be generated by JS -->
+            <!-- Board Wrapper -->
+            <div class="board-wrapper" id="boardWrapper">
+                <div class="board" id="board">
+                    <!-- Columns will be generated by JS -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1468,16 +1523,6 @@
                     <button class="theme-option" id="themeModern" onclick="setTheme('modern')">Moderno</button>
                     <button class="theme-option" id="themeBlocky" onclick="setTheme('blocky')">Blocky</button>
                 </div>
-            </div>
-
-            <div class="sidebar-section">
-                <div class="sidebar-section-title" id="boardsSectionTitle">Mis Tableros</div>
-                <div class="board-list" id="boardList">
-                    <!-- Boards will be generated by JS -->
-                </div>
-                <button class="add-board-btn" onclick="createNewBoard()" id="btnNewBoard">
-                    <span id="btnNewBoardIcon">+</span> <span id="btnNewBoardText">Nuevo tablero</span>
-                </button>
             </div>
             
             <div class="sidebar-section">
@@ -1617,7 +1662,9 @@
             applyTheme(appData.theme || 'modern');
             renderBoard();
             updateBoardSelector();
+            renderBoardDropdown();
             setupHorizontalScroll();
+            setupClickOutside();
         }
 
         // Load data from localStorage
@@ -1643,6 +1690,7 @@
             applyTheme(theme);
             updateThemeToggle();
             renderBoard();
+            renderBoardDropdown();
             updateTexts();
         }
 
@@ -1672,13 +1720,15 @@
             document.getElementById('btnNew').textContent = isBlocky ? '[+]' : '+';
             document.getElementById('btnMenu').textContent = isBlocky ? '[#]' : '☰';
             
+            // Dropdown
+            document.getElementById('dropdownHeader').textContent = isBlocky ? 'MIS TABLEROS' : 'Mis Tableros';
+            document.getElementById('dropdownAddIcon').textContent = isBlocky ? '[+]' : '+';
+            document.getElementById('dropdownAddText').textContent = isBlocky ? 'NUEVO TABLERO' : 'Nuevo tablero';
+            
             // Sidebar
             document.getElementById('sidebarTitle').textContent = isBlocky ? 'MENU' : 'Menú';
             document.getElementById('btnCloseSidebar').textContent = isBlocky ? '[X]' : '✕';
             document.getElementById('themeSectionTitle').textContent = isBlocky ? 'TEMA VISUAL' : 'Tema Visual';
-            document.getElementById('boardsSectionTitle').textContent = isBlocky ? 'MIS TABLEROS' : 'Mis Tableros';
-            document.getElementById('btnNewBoardIcon').textContent = isBlocky ? '[+]' : '+';
-            document.getElementById('btnNewBoardText').textContent = isBlocky ? 'NUEVO TABLERO' : 'Nuevo tablero';
             document.getElementById('dataSectionTitle').textContent = isBlocky ? 'DATOS' : 'Datos';
             document.getElementById('iconExport').textContent = isBlocky ? '[>]' : '📤';
             document.getElementById('textExport').textContent = isBlocky ? 'EXPORTAR (JSON)' : 'Exportar datos (JSON)';
@@ -1730,12 +1780,103 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
         }
 
+        // Board Dropdown functions
+        function toggleBoardDropdown() {
+            const wrapper = document.getElementById('boardSelectorWrapper');
+            wrapper.classList.toggle('active');
+            if (wrapper.classList.contains('active')) {
+                renderBoardDropdown();
+            }
+        }
+
+        function closeBoardDropdown() {
+            document.getElementById('boardSelectorWrapper').classList.remove('active');
+        }
+
+        function renderBoardDropdown() {
+            const list = document.getElementById('boardDropdownList');
+            const isBlocky = appData.theme === 'blocky';
+            const icon = isBlocky ? '[K]' : '📋';
+            const editIcon = isBlocky ? '[E]' : '✏️';
+            const deleteIcon = isBlocky ? '[D]' : '🗑️';
+            
+            list.innerHTML = appData.boards.map(board => `
+                <div class="board-dropdown-item ${board.id === appData.currentBoardId ? 'active' : ''}" 
+                     onclick="switchBoardFromDropdown('${board.id}')">
+                    <div class="board-dropdown-item-name">
+                        <span>${icon}</span>
+                        <span>${escapeHtml(isBlocky ? board.name.toUpperCase().replace(/\s+/g, '-') : board.name)}</span>
+                    </div>
+                    <div class="board-dropdown-item-actions" onclick="event.stopPropagation()">
+                        <button class="btn-small" onclick="renameBoardFromDropdown(event, '${board.id}')">${editIcon}</button>
+                        <button class="btn-small" onclick="deleteBoardFromDropdown(event, '${board.id}')">${deleteIcon}</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function switchBoardFromDropdown(boardId) {
+            appData.currentBoardId = boardId;
+            saveData();
+            updateBoardSelector();
+            renderBoard();
+            closeBoardDropdown();
+        }
+
+        function createNewBoardFromDropdown() {
+            closeBoardDropdown();
+            createNewBoard();
+        }
+
+        function renameBoardFromDropdown(e, boardId) {
+            e.stopPropagation();
+            closeBoardDropdown();
+            renameBoard({ stopPropagation: () => {} }, boardId);
+        }
+
+        function deleteBoardFromDropdown(e, boardId) {
+            e.stopPropagation();
+            const isBlocky = appData.theme === 'blocky';
+            
+            if (appData.boards.length <= 1) {
+                alert(isBlocky ? 'DEBES TENER AL MENOS UN TABLERO' : 'Debes tener al menos un tablero');
+                return;
+            }
+            
+            const board = appData.boards.find(b => b.id === boardId);
+            const confirmMsg = isBlocky ? 
+                `¿ELIMINAR EL TABLERO "${board.name.toUpperCase().replace(/\s+/g, '-')}"?` :
+                `¿Eliminar el tablero "${board.name}"?`;
+            
+            if (!confirm(confirmMsg)) return;
+            
+            appData.boards = appData.boards.filter(b => b.id !== boardId);
+            
+            if (appData.currentBoardId === boardId) {
+                appData.currentBoardId = appData.boards[0].id;
+            }
+            
+            saveData();
+            updateBoardSelector();
+            renderBoard();
+            renderBoardDropdown();
+        }
+
+        // Setup click outside to close dropdown
+        function setupClickOutside() {
+            document.addEventListener('click', (e) => {
+                const wrapper = document.getElementById('boardSelectorWrapper');
+                if (!wrapper.contains(e.target)) {
+                    closeBoardDropdown();
+                }
+            });
+        }
+
         // Setup horizontal scroll with mouse wheel
         function setupHorizontalScroll() {
             const boardWrapper = document.getElementById('boardWrapper');
             
             boardWrapper.addEventListener('wheel', (e) => {
-                // Only handle horizontal scroll on desktop
                 if (window.innerWidth > 768) {
                     if (e.deltaY !== 0) {
                         e.preventDefault();
@@ -1832,7 +1973,6 @@
         function handleTouchStart(e, taskId) {
             touchDragTaskId = taskId;
             touchMoved = false;
-            const touch = e.touches[0];
         }
 
         function handleTouchMove(e) {
@@ -1858,7 +1998,6 @@
                 e.stopPropagation();
                 return;
             }
-            // On desktop, clicking the card opens the menu
             if (window.matchMedia('(pointer: fine)').matches) {
                 showTaskMenu(e, taskId);
             }
@@ -2008,7 +2147,6 @@
         function openSidebar() {
             document.getElementById('sidebarOverlay').classList.add('active');
             document.getElementById('sidebar').classList.add('active');
-            renderBoardList();
             updateThemeToggle();
             updateTexts();
         }
@@ -2018,35 +2156,12 @@
             document.getElementById('sidebar').classList.remove('active');
         }
 
-        function renderBoardList() {
-            const list = document.getElementById('boardList');
-            const isBlocky = appData.theme === 'blocky';
-            const icon = isBlocky ? '[K]' : '📋';
-            const editIcon = isBlocky ? '[E]' : '✏️';
-            const deleteIcon = isBlocky ? '[D]' : '🗑️';
-            
-            list.innerHTML = appData.boards.map(board => `
-                <div class="board-item ${board.id === appData.currentBoardId ? 'active' : ''}" 
-                     onclick="switchBoard('${board.id}')">
-                    <div class="board-item-name">
-                        <span>${icon}</span>
-                        <span>${escapeHtml(isBlocky ? board.name.toUpperCase().replace(/\s+/g, '-') : board.name)}</span>
-                    </div>
-                    <div class="board-item-actions">
-                        <button class="btn-small" onclick="renameBoard(event, '${board.id}')">${editIcon}</button>
-                        <button class="btn-small" onclick="deleteBoard(event, '${board.id}')">${deleteIcon}</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
         // Board operations
         function switchBoard(boardId) {
             appData.currentBoardId = boardId;
             saveData();
             updateBoardSelector();
             renderBoard();
-            renderBoardList();
         }
 
         function createNewBoard() {
@@ -2111,9 +2226,7 @@
             saveData();
             updateBoardSelector();
             renderBoard();
-            if (document.getElementById('sidebar').classList.contains('active')) {
-                renderBoardList();
-            }
+            renderBoardDropdown();
             closeBoardModal();
         }
 
@@ -2142,7 +2255,7 @@
             saveData();
             updateBoardSelector();
             renderBoard();
-            renderBoardList();
+            renderBoardDropdown();
         }
 
         function deleteCurrentBoard() {
@@ -2217,6 +2330,7 @@
                         applyTheme(appData.theme);
                         updateBoardSelector();
                         renderBoard();
+                        renderBoardDropdown();
                         alert(isBlocky ? 'DATOS IMPORTADOS CORRECTAMENTE' : 'Datos importados correctamente');
                     }
                 } catch (err) {
@@ -2253,6 +2367,7 @@
                 closeTaskModal();
                 closeBoardModal();
                 closeSidebar();
+                closeBoardDropdown();
                 hideContextMenu();
             }
         });
