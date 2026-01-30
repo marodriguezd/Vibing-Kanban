@@ -1,0 +1,2264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mi Kanban</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           CSS VARIABLES - THEME SYSTEM
+           ============================================ */
+        :root {
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --bg-column: #f0f0f0;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --border-color: #e0e0e0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+            
+            --radius: 8px;
+            --radius-sm: 4px;
+            --radius-card: 4px;
+            
+            --header-height: 60px;
+            --column-width: 300px;
+            --card-padding: 14px;
+            --board-gap: 16px;
+            
+            --todo-dot: #666666;
+            --progress-dot: #3b82f6;
+            --review-dot: #f59e0b;
+            --done-dot: #22c55e;
+            --cancelled-dot: #ef4444;
+        }
+
+        [data-theme="blocky"] {
+            --font-main: 'JetBrains Mono', 'Courier New', monospace;
+            
+            --bg-primary: #fafafa;
+            --bg-secondary: #ffffff;
+            --bg-column: #f5f5f5;
+            --text-primary: #000000;
+            --text-secondary: #555555;
+            --text-muted: #888888;
+            --border-color: #000000;
+            --shadow: none;
+            --shadow-hover: none;
+            
+            --radius: 0px;
+            --radius-sm: 0px;
+            --radius-card: 0px;
+            
+            --header-height: 50px;
+            --column-width: 280px;
+            --card-padding: 12px;
+            --board-gap: 0px;
+            
+            --todo-dot: #000000;
+            --progress-dot: #0066cc;
+            --review-dot: #cc8800;
+            --done-dot: #008800;
+            --cancelled-dot: #cc0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        .header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            height: var(--header-height);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        [data-theme="blocky"] .header {
+            border-bottom-width: 2px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .logo {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        [data-theme="blocky"] .logo {
+            border-color: var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .logo:hover {
+            background-color: var(--bg-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="blocky"] .logo:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .logo-icon {
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logo-arrow {
+            flex-shrink: 0;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 8px 12px 8px 32px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            width: 200px;
+            background-color: var(--bg-primary);
+            transition: all 0.2s;
+            font-family: var(--font-main);
+        }
+
+        [data-theme="blocky"] .search-box input {
+            border-width: 2px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--progress-dot);
+            background-color: var(--bg-secondary);
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+        }
+
+        [data-theme="blocky"] .search-box::before {
+            content: ">";
+            font-family: var(--font-mono);
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        [data-theme="blocky"] .btn-icon {
+            border-width: 2px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--bg-primary);
+        }
+
+        [data-theme="blocky"] .btn-icon:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        /* ============================================
+           BOARD CONTAINER - SCROLLABLE AREA
+           ============================================ */
+        .board-wrapper {
+            flex: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 20px;
+        }
+
+        [data-theme="blocky"] .board-wrapper {
+            padding: 0;
+            padding-top: 0;
+        }
+
+        .board {
+            display: flex;
+            gap: var(--board-gap);
+            height: 100%;
+            min-width: fit-content;
+        }
+
+        /* ============================================
+           COLUMN
+           ============================================ */
+        .column {
+            background-color: var(--bg-column);
+            border-radius: var(--radius);
+            width: var(--column-width);
+            min-width: var(--column-width);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid transparent;
+        }
+
+        [data-theme="blocky"] .column {
+            border-color: var(--border-color);
+            border-width: 2px;
+            border-top-width: 0;
+            border-bottom-width: 0;
+            border-left-width: 2px;
+            border-right-width: 0;
+        }
+
+        [data-theme="blocky"] .column:first-child {
+            border-left-width: 0;
+        }
+
+        [data-theme="blocky"] .column:last-child {
+            border-right-width: 2px;
+        }
+
+        .column-header {
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            background-color: var(--bg-secondary);
+        }
+
+        [data-theme="blocky"] .column-header {
+            border-bottom-width: 2px;
+            padding: 12px;
+        }
+
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        [data-theme="blocky"] .column-title {
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .column-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        [data-theme="blocky"] .column-dot {
+            border-radius: 0;
+        }
+
+        .column-dot.todo { background-color: var(--todo-dot); }
+        .column-dot.progress { background-color: var(--progress-dot); }
+        .column-dot.review { background-color: var(--review-dot); }
+        .column-dot.done { background-color: var(--done-dot); }
+        .column-dot.cancelled { background-color: var(--cancelled-dot); }
+
+        .column-count {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-family: var(--font-mono);
+            margin-left: 4px;
+        }
+
+        [data-theme="blocky"] .column-count {
+            border: 1px solid var(--border-color);
+            padding: 1px 6px;
+            font-size: 10px;
+        }
+
+        .column-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-column-action {
+            width: 26px;
+            height: 26px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        [data-theme="blocky"] .btn-column-action {
+            border-width: 2px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .btn-column-action:hover {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        [data-theme="blocky"] .btn-column-action:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .column-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        [data-theme="blocky"] .column-content {
+            gap: 0;
+            padding: 0;
+        }
+
+        .column-content.drag-over {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        [data-theme="blocky"] .column-content.drag-over {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* ============================================
+           CARD
+           ============================================ */
+        .card {
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-card);
+            padding: var(--card-padding);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid var(--border-color);
+            touch-action: none;
+            user-select: none;
+            position: relative;
+        }
+
+        [data-theme="blocky"] .card {
+            border-width: 2px;
+            border-bottom-width: 1px;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        [data-theme="blocky"] .card:last-child {
+            border-bottom-width: 2px;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+            border-color: var(--text-primary);
+        }
+
+        [data-theme="blocky"] .card:hover {
+            background-color: #f0f0f0;
+        }
+
+        .card.dragging {
+            opacity: 0.6;
+        }
+
+        [data-theme="blocky"] .card.dragging {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.4;
+            word-break: break-word;
+            flex: 1;
+            margin-right: 8px;
+        }
+
+        [data-theme="blocky"] .card-title {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .card-menu {
+            width: 24px;
+            height: 24px;
+            border: 1px solid transparent;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        [data-theme="blocky"] .card-menu {
+            opacity: 1;
+            border-color: var(--border-color);
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .card:hover .card-menu,
+        .card:active .card-menu {
+            opacity: 1;
+        }
+
+        .card-menu:hover {
+            background-color: var(--bg-primary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        [data-theme="blocky"] .card-menu:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .card-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        [data-theme="blocky"] .card-description {
+            font-size: 11px;
+        }
+
+        /* ============================================
+           ADD CARD BUTTON
+           ============================================ */
+        .add-card-btn {
+            margin: 12px;
+            padding: 10px 14px;
+            border: 1px dashed var(--border-color);
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            flex-shrink: 0;
+            font-family: var(--font-main);
+        }
+
+        [data-theme="blocky"] .add-card-btn {
+            border-style: solid;
+            border-width: 2px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 10px;
+            margin: 8px;
+        }
+
+        .add-card-btn:hover {
+            border-color: var(--progress-dot);
+            color: var(--progress-dot);
+            border-style: solid;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        [data-theme="blocky"] .add-card-btn:hover {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        /* ============================================
+           MODAL
+           ============================================ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            padding: 16px;
+        }
+
+        [data-theme="blocky"] .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="blocky"] .modal {
+            border-width: 2px;
+            border-radius: 0;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-column);
+        }
+
+        [data-theme="blocky"] .modal-header {
+            border-bottom-width: 2px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        [data-theme="blocky"] .modal-title {
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        [data-theme="blocky"] .modal-close {
+            border-width: 2px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+
+        .modal-close:hover {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        [data-theme="blocky"] .modal-close:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        [data-theme="blocky"] .form-label {
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: var(--font-main);
+            transition: all 0.2s;
+            background-color: var(--bg-secondary);
+        }
+
+        [data-theme="blocky"] .form-input,
+        [data-theme="blocky"] .form-textarea {
+            border-width: 2px;
+            border-radius: 0;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--progress-dot);
+        }
+
+        [data-theme="blocky"] .form-input:focus,
+        [data-theme="blocky"] .form-textarea:focus {
+            border-color: #000;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: var(--font-main);
+            background-color: var(--bg-secondary);
+            cursor: pointer;
+        }
+
+        [data-theme="blocky"] .form-select {
+            border-width: 2px;
+            border-radius: 0;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        [data-theme="blocky"] .modal-footer {
+            border-top-width: 2px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+            font-family: var(--font-main);
+        }
+
+        [data-theme="blocky"] .btn {
+            border-width: 2px;
+            border-radius: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 11px;
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        [data-theme="blocky"] .btn-secondary:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background-color: var(--progress-dot);
+            color: white;
+            border-color: var(--progress-dot);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        [data-theme="blocky"] .btn-primary:hover {
+            background-color: #000;
+            border-color: #000;
+        }
+
+        /* ============================================
+           SIDEBAR MENU
+           ============================================ */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        [data-theme="blocky"] .sidebar-overlay {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background-color: var(--bg-secondary);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            z-index: 201;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-color);
+        }
+
+        [data-theme="blocky"] .sidebar {
+            border-left-width: 2px;
+            box-shadow: none;
+        }
+
+        .sidebar.active {
+            right: 0;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-column);
+        }
+
+        [data-theme="blocky"] .sidebar-header {
+            border-bottom-width: 2px;
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        [data-theme="blocky"] .sidebar-title {
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-close {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        [data-theme="blocky"] .sidebar-close {
+            border-width: 2px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+
+        .sidebar-close:hover {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        [data-theme="blocky"] .sidebar-close:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        [data-theme="blocky"] .sidebar-section-title {
+            font-size: 10px;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
+        [data-theme="blocky"] .menu-item {
+            border-color: var(--border-color);
+            border-width: 2px;
+            border-radius: 0;
+            margin-bottom: 4px;
+        }
+
+        .menu-item:hover {
+            background-color: var(--bg-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="blocky"] .menu-item:hover {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .menu-item-icon {
+            width: 24px;
+            text-align: center;
+        }
+
+        .board-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        [data-theme="blocky"] .board-list {
+            gap: 0;
+        }
+
+        .board-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
+        [data-theme="blocky"] .board-item {
+            border-color: var(--border-color);
+            border-width: 2px;
+            border-radius: 0;
+            border-bottom-width: 1px;
+        }
+
+        [data-theme="blocky"] .board-item:last-child {
+            border-bottom-width: 2px;
+        }
+
+        .board-item:hover {
+            background-color: var(--bg-primary);
+            border-color: var(--border-color);
+        }
+
+        [data-theme="blocky"] .board-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .board-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--progress-dot);
+            font-weight: 600;
+            border-color: var(--progress-dot);
+        }
+
+        [data-theme="blocky"] .board-item.active {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .board-item-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .board-item-name span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .board-item-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        [data-theme="blocky"] .board-item-actions {
+            opacity: 1;
+        }
+
+        .board-item:hover .board-item-actions {
+            opacity: 1;
+        }
+
+        .btn-small {
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        [data-theme="blocky"] .btn-small {
+            border-width: 2px;
+            border-radius: 0;
+            font-family: var(--font-mono);
+            font-size: 10px;
+        }
+
+        .btn-small:hover {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        [data-theme="blocky"] .btn-small:hover {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .add-board-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px dashed var(--border-color);
+            background: transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 8px;
+            font-family: var(--font-main);
+        }
+
+        [data-theme="blocky"] .add-board-btn {
+            border-style: solid;
+            border-width: 2px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 11px;
+        }
+
+        .add-board-btn:hover {
+            border-color: var(--progress-dot);
+            color: var(--progress-dot);
+            border-style: solid;
+        }
+
+        [data-theme="blocky"] .add-board-btn:hover {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        /* ============================================
+           CONTEXT MENU
+           ============================================ */
+        .context-menu {
+            position: fixed;
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-hover);
+            padding: 6px 0;
+            min-width: 160px;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+            transition: all 0.15s;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="blocky"] .context-menu {
+            border-width: 2px;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .context-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .context-menu-item {
+            padding: 10px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.15s;
+        }
+
+        [data-theme="blocky"] .context-menu-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        [data-theme="blocky"] .context-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--bg-primary);
+        }
+
+        [data-theme="blocky"] .context-menu-item:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .context-menu-item.danger {
+            color: var(--cancelled-dot);
+        }
+
+        [data-theme="blocky"] .context-menu-item.danger:hover {
+            background-color: var(--cancelled-dot);
+            color: #fff;
+        }
+
+        /* ============================================
+           THEME TOGGLE
+           ============================================ */
+        .theme-toggle {
+            display: flex;
+            gap: 0;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        [data-theme="blocky"] .theme-toggle {
+            border-width: 2px;
+            border-radius: 0;
+        }
+
+        .theme-option {
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-family: var(--font-main);
+        }
+
+        [data-theme="blocky"] .theme-option {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .theme-option:hover {
+            background-color: var(--bg-primary);
+        }
+
+        .theme-option.active {
+            background-color: var(--text-primary);
+            color: var(--bg-secondary);
+        }
+
+        [data-theme="blocky"] .theme-option.active {
+            background-color: #000;
+        }
+
+        /* ============================================
+           SCROLLBAR
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        [data-theme="blocky"] ::-webkit-scrollbar-thumb {
+            background: #000;
+            border-radius: 0;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* ============================================
+           EMPTY STATE
+           ============================================ */
+        .empty-state {
+            text-align: center;
+            padding: 24px 16px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        [data-theme="blocky"] .empty-state {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ============================================
+           HIDDEN INPUT
+           ============================================ */
+        .hidden-input {
+            display: none;
+        }
+
+        /* ============================================
+           MOBILE RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            html, body {
+                height: auto;
+                overflow: auto;
+            }
+
+            body {
+                display: block;
+            }
+
+            .header {
+                padding: 0 12px;
+                position: sticky;
+                top: 0;
+            }
+
+            .logo {
+                font-size: 14px;
+                padding: 6px 8px;
+            }
+
+            .search-box {
+                display: none;
+            }
+
+            .board-wrapper {
+                padding: 12px;
+                overflow-x: hidden;
+                overflow-y: visible;
+            }
+
+            .board {
+                flex-direction: column;
+                gap: 12px;
+                height: auto;
+            }
+
+            [data-theme="blocky"] .board {
+                gap: 0;
+            }
+
+            .column {
+                width: 100%;
+                min-width: 100%;
+                height: auto;
+                max-height: none;
+            }
+
+            [data-theme="blocky"] .column {
+                border-left-width: 0;
+                border-right-width: 0;
+                border-top-width: 2px;
+                border-bottom-width: 0;
+            }
+
+            [data-theme="blocky"] .column:first-child {
+                border-top-width: 0;
+            }
+
+            [data-theme="blocky"] .column:last-child {
+                border-bottom-width: 2px;
+            }
+
+            .column-content {
+                padding: 10px;
+                gap: 8px;
+                max-height: none;
+                overflow-y: visible;
+            }
+
+            [data-theme="blocky"] .column-content {
+                gap: 0;
+                padding: 0;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .card-menu {
+                opacity: 1;
+            }
+
+            .add-card-btn {
+                margin: 10px;
+            }
+
+            .sidebar {
+                width: 100%;
+                right: -100%;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .modal-footer .btn {
+                width: 100%;
+            }
+        }
+
+        /* Tablet */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            :root {
+                --column-width: 260px;
+            }
+
+            [data-theme="blocky"] {
+                --column-width: 240px;
+            }
+
+            .search-box input {
+                width: 160px;
+            }
+        }
+
+        /* Touch devices */
+        @media (pointer: coarse) {
+            .card-menu {
+                opacity: 1;
+                width: 32px;
+                height: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo" onclick="openSidebar()">
+                <span class="logo-icon" id="logoIcon">📋</span>
+                <span class="logo-text" id="currentBoardName">Mi Tablero</span>
+                <span class="logo-arrow" id="logoArrow">▼</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar tareas...">
+            </div>
+            <button class="btn-icon" title="Nueva tarea" onclick="openModal()" id="btnNew">+</button>
+            <button class="btn-icon" title="Menú" onclick="openSidebar()" id="btnMenu">☰</button>
+        </div>
+    </header>
+
+    <!-- Board Wrapper - Scrollable Area -->
+    <div class="board-wrapper" id="boardWrapper">
+        <div class="board" id="board">
+            <!-- Columns will be generated by JS -->
+        </div>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title" id="sidebarTitle">Menú</h2>
+            <button class="sidebar-close" onclick="closeSidebar()" id="btnCloseSidebar">✕</button>
+        </div>
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <div class="sidebar-section-title" id="themeSectionTitle">Tema Visual</div>
+                <div class="theme-toggle">
+                    <button class="theme-option" id="themeModern" onclick="setTheme('modern')">Moderno</button>
+                    <button class="theme-option" id="themeBlocky" onclick="setTheme('blocky')">Blocky</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title" id="boardsSectionTitle">Mis Tableros</div>
+                <div class="board-list" id="boardList">
+                    <!-- Boards will be generated by JS -->
+                </div>
+                <button class="add-board-btn" onclick="createNewBoard()" id="btnNewBoard">
+                    <span id="btnNewBoardIcon">+</span> <span id="btnNewBoardText">Nuevo tablero</span>
+                </button>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-section-title" id="dataSectionTitle">Datos</div>
+                <div class="menu-item" onclick="exportData()">
+                    <span class="menu-item-icon" id="iconExport">📤</span>
+                    <span id="textExport">Exportar datos (JSON)</span>
+                </div>
+                <div class="menu-item" onclick="importData()">
+                    <span class="menu-item-icon" id="iconImport">📥</span>
+                    <span id="textImport">Importar datos (JSON)</span>
+                </div>
+                <input type="file" id="importFile" class="hidden-input" accept=".json" onchange="handleImport(event)">
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-section-title" id="currentBoardSectionTitle">Tablero actual</div>
+                <div class="menu-item" onclick="renameCurrentBoard()">
+                    <span class="menu-item-icon" id="iconRename">✏️</span>
+                    <span id="textRename">Renombrar tablero</span>
+                </div>
+                <div class="menu-item" onclick="deleteCurrentBoard()">
+                    <span class="menu-item-icon" id="iconDelete">🗑️</span>
+                    <span id="textDelete" style="color: var(--cancelled-dot);">Eliminar tablero</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="taskModalTitle">Nueva Tarea</h2>
+                <button class="modal-close" onclick="closeTaskModal()" id="btnCloseTask">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" id="labelTitle">Título</label>
+                    <input type="text" class="form-input" id="taskTitle" placeholder="Nombre de la tarea">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="labelDesc">Descripción</label>
+                    <textarea class="form-textarea" id="taskDescription" placeholder="Descripción detallada..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="labelColumn">Columna</label>
+                    <select class="form-select" id="taskColumn">
+                        <option value="todo">To Do</option>
+                        <option value="progress">In Progress</option>
+                        <option value="review">In Review</option>
+                        <option value="done">Done</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeTaskModal()" id="btnCancel">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveTask()" id="btnSave">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Board Name Modal -->
+    <div class="modal-overlay" id="boardModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="boardModalTitle">Nuevo Tablero</h2>
+                <button class="modal-close" onclick="closeBoardModal()" id="btnCloseBoard">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" id="labelBoardName">Nombre del tablero</label>
+                    <input type="text" class="form-input" id="boardNameInput" placeholder="Mi Tablero">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBoardModal()" id="btnCancelBoard">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveBoardName()" id="btnSaveBoard">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" onclick="editTask()">
+            <span id="ctxIconEdit">✏️</span> <span id="ctxTextEdit">Editar</span>
+        </div>
+        <div class="context-menu-item danger" onclick="deleteTask()">
+            <span id="ctxIconDelete">🗑️</span> <span id="ctxTextDelete">Eliminar</span>
+        </div>
+    </div>
+
+    <script>
+        // Data structure
+        const columns = [
+            { id: 'todo', title: 'To Do', dot: 'todo' },
+            { id: 'progress', title: 'In Progress', dot: 'progress' },
+            { id: 'review', title: 'In Review', dot: 'review' },
+            { id: 'done', title: 'Done', dot: 'done' },
+            { id: 'cancelled', title: 'Cancelled', dot: 'cancelled' }
+        ];
+
+        const columnsBlocky = [
+            { id: 'todo', title: 'TO DO', dot: 'todo' },
+            { id: 'progress', title: 'IN PROGRESS', dot: 'progress' },
+            { id: 'review', title: 'IN REVIEW', dot: 'review' },
+            { id: 'done', title: 'DONE', dot: 'done' },
+            { id: 'cancelled', title: 'CANCELLED', dot: 'cancelled' }
+        ];
+
+        // Default data
+        const defaultData = {
+            boards: [
+                {
+                    id: 'default',
+                    name: 'Mi Tablero',
+                    tasks: []
+                }
+            ],
+            currentBoardId: 'default',
+            theme: 'modern'
+        };
+
+        let appData = null;
+        let currentTaskId = null;
+        let draggedTask = null;
+        let boardModalMode = 'create';
+        let boardModalTargetId = null;
+        let touchDragElement = null;
+        let touchDragTaskId = null;
+        let touchMoved = false;
+
+        // Initialize
+        function init() {
+            loadData();
+            applyTheme(appData.theme || 'modern');
+            renderBoard();
+            updateBoardSelector();
+            setupHorizontalScroll();
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('kanban-data');
+            if (saved) {
+                appData = JSON.parse(saved);
+            } else {
+                appData = JSON.parse(JSON.stringify(defaultData));
+                saveData();
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('kanban-data', JSON.stringify(appData));
+        }
+
+        // Theme functions
+        function setTheme(theme) {
+            appData.theme = theme;
+            saveData();
+            applyTheme(theme);
+            updateThemeToggle();
+            renderBoard();
+            updateTexts();
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function updateThemeToggle() {
+            const modernBtn = document.getElementById('themeModern');
+            const blockyBtn = document.getElementById('themeBlocky');
+            
+            if (appData.theme === 'blocky') {
+                modernBtn.classList.remove('active');
+                blockyBtn.classList.add('active');
+            } else {
+                modernBtn.classList.add('active');
+                blockyBtn.classList.remove('active');
+            }
+        }
+
+        function updateTexts() {
+            const isBlocky = appData.theme === 'blocky';
+            
+            // Header icons
+            document.getElementById('logoIcon').textContent = isBlocky ? '[K]' : '📋';
+            document.getElementById('logoArrow').textContent = isBlocky ? '_' : '▼';
+            document.getElementById('btnNew').textContent = isBlocky ? '[+]' : '+';
+            document.getElementById('btnMenu').textContent = isBlocky ? '[#]' : '☰';
+            
+            // Sidebar
+            document.getElementById('sidebarTitle').textContent = isBlocky ? 'MENU' : 'Menú';
+            document.getElementById('btnCloseSidebar').textContent = isBlocky ? '[X]' : '✕';
+            document.getElementById('themeSectionTitle').textContent = isBlocky ? 'TEMA VISUAL' : 'Tema Visual';
+            document.getElementById('boardsSectionTitle').textContent = isBlocky ? 'MIS TABLEROS' : 'Mis Tableros';
+            document.getElementById('btnNewBoardIcon').textContent = isBlocky ? '[+]' : '+';
+            document.getElementById('btnNewBoardText').textContent = isBlocky ? 'NUEVO TABLERO' : 'Nuevo tablero';
+            document.getElementById('dataSectionTitle').textContent = isBlocky ? 'DATOS' : 'Datos';
+            document.getElementById('iconExport').textContent = isBlocky ? '[>]' : '📤';
+            document.getElementById('textExport').textContent = isBlocky ? 'EXPORTAR (JSON)' : 'Exportar datos (JSON)';
+            document.getElementById('iconImport').textContent = isBlocky ? '[<]' : '📥';
+            document.getElementById('textImport').textContent = isBlocky ? 'IMPORTAR (JSON)' : 'Importar datos (JSON)';
+            document.getElementById('currentBoardSectionTitle').textContent = isBlocky ? 'TABLERO ACTUAL' : 'Tablero actual';
+            document.getElementById('iconRename').textContent = isBlocky ? '[E]' : '✏️';
+            document.getElementById('textRename').textContent = isBlocky ? 'RENOMBRAR' : 'Renombrar tablero';
+            document.getElementById('iconDelete').textContent = isBlocky ? '[D]' : '🗑️';
+            document.getElementById('textDelete').textContent = isBlocky ? 'ELIMINAR' : 'Eliminar tablero';
+            
+            // Modals
+            document.getElementById('btnCloseTask').textContent = isBlocky ? '[X]' : '✕';
+            document.getElementById('btnCloseBoard').textContent = isBlocky ? '[X]' : '✕';
+            document.getElementById('btnCancel').textContent = isBlocky ? 'CANCELAR' : 'Cancelar';
+            document.getElementById('btnSave').textContent = isBlocky ? 'GUARDAR' : 'Guardar';
+            document.getElementById('btnCancelBoard').textContent = isBlocky ? 'CANCELAR' : 'Cancelar';
+            document.getElementById('btnSaveBoard').textContent = isBlocky ? 'GUARDAR' : 'Guardar';
+            document.getElementById('labelTitle').textContent = isBlocky ? 'TITULO' : 'Título';
+            document.getElementById('labelDesc').textContent = isBlocky ? 'DESCRIPCION' : 'Descripción';
+            document.getElementById('labelColumn').textContent = isBlocky ? 'COLUMNA' : 'Columna';
+            document.getElementById('labelBoardName').textContent = isBlocky ? 'NOMBRE DEL TABLERO' : 'Nombre del tablero';
+            
+            // Context menu
+            document.getElementById('ctxIconEdit').textContent = isBlocky ? '[E]' : '✏️';
+            document.getElementById('ctxTextEdit').textContent = isBlocky ? 'EDITAR' : 'Editar';
+            document.getElementById('ctxIconDelete').textContent = isBlocky ? '[D]' : '🗑️';
+            document.getElementById('ctxTextDelete').textContent = isBlocky ? 'ELIMINAR' : 'Eliminar';
+            
+            // Update board selector
+            const currentBoard = getCurrentBoard();
+            if (currentBoard) {
+                document.getElementById('currentBoardName').textContent = isBlocky ? 
+                    currentBoard.name.toUpperCase().replace(/\s+/g, '-') : 
+                    currentBoard.name;
+            }
+            
+            // Update search placeholder
+            document.getElementById('searchInput').placeholder = isBlocky ? 'buscar...' : 'Buscar tareas...';
+        }
+
+        // Get current board
+        function getCurrentBoard() {
+            return appData.boards.find(b => b.id === appData.currentBoardId);
+        }
+
+        // Generate unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Setup horizontal scroll with mouse wheel
+        function setupHorizontalScroll() {
+            const boardWrapper = document.getElementById('boardWrapper');
+            
+            boardWrapper.addEventListener('wheel', (e) => {
+                // Only handle horizontal scroll on desktop
+                if (window.innerWidth > 768) {
+                    if (e.deltaY !== 0) {
+                        e.preventDefault();
+                        boardWrapper.scrollLeft += e.deltaY;
+                    }
+                }
+            }, { passive: false });
+        }
+
+        // Render board
+        function renderBoard() {
+            const board = document.getElementById('board');
+            const currentBoard = getCurrentBoard();
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const isBlocky = appData.theme === 'blocky';
+            const cols = isBlocky ? columnsBlocky : columns;
+            
+            if (!currentBoard) {
+                board.innerHTML = `<div class="empty-state">${isBlocky ? 'SELECCIONA O CREA UN TABLERO' : 'Selecciona o crea un tablero'}</div>`;
+                return;
+            }
+
+            board.innerHTML = cols.map(col => {
+                const colTasks = currentBoard.tasks.filter(t => 
+                    t.column === col.id && 
+                    (t.title.toLowerCase().includes(searchTerm) || 
+                     (t.description && t.description.toLowerCase().includes(searchTerm)))
+                );
+                
+                const btnAdd = isBlocky ? '[+]' : '+';
+                const btnMenu = isBlocky ? '[_]' : '⋯';
+                const emptyText = isBlocky ? 'SIN TAREAS' : 'Sin tareas';
+                const addText = isBlocky ? 'AÑADIR TAREA' : 'Añadir tarea';
+                
+                return `
+                    <div class="column" data-column="${col.id}">
+                        <div class="column-header">
+                            <div class="column-title">
+                                <span class="column-dot ${col.dot}"></span>
+                                ${col.title}
+                                <span class="column-count">${colTasks.length}</span>
+                            </div>
+                            <div class="column-actions">
+                                <button class="btn-column-action" onclick="openModal('${col.id}')">${btnAdd}</button>
+                            </div>
+                        </div>
+                        <div class="column-content" 
+                             ondrop="handleDrop(event, '${col.id}')" 
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            ${colTasks.length === 0 ? 
+                                `<div class="empty-state">${emptyText}</div>` : 
+                                colTasks.map(task => createCardHTML(task, btnMenu)).join('')
+                            }
+                        </div>
+                        <button class="add-card-btn" onclick="openModal('${col.id}')">
+                            <span>${btnAdd}</span> ${addText}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Create card HTML
+        function createCardHTML(task, menuIcon) {
+            return `
+                <div class="card" 
+                     draggable="true" 
+                     data-id="${task.id}"
+                     ondragstart="handleDragStart(event, '${task.id}')"
+                     ondragend="handleDragEnd(event)"
+                     ontouchstart="handleTouchStart(event, '${task.id}')"
+                     ontouchmove="handleTouchMove(event)"
+                     ontouchend="handleTouchEnd(event)"
+                     onclick="handleCardClick(event, '${task.id}')">
+                    <div class="card-header">
+                        <div class="card-title">${escapeHtml(task.title)}</div>
+                        <button class="card-menu" onclick="showTaskMenu(event, '${task.id}')">${menuIcon}</button>
+                    </div>
+                    ${task.description ? `<div class="card-description">${escapeHtml(task.description)}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Touch events
+        function handleTouchStart(e, taskId) {
+            touchDragTaskId = taskId;
+            touchMoved = false;
+            const touch = e.touches[0];
+        }
+
+        function handleTouchMove(e) {
+            if (!touchDragTaskId) return;
+            touchMoved = true;
+        }
+
+        function handleTouchEnd(e) {
+            if (!touchDragTaskId) return;
+            
+            if (!touchMoved) {
+                const touch = e.changedTouches[0];
+                showTaskMenu({ stopPropagation: () => {}, pageX: touch.pageX, pageY: touch.pageY }, touchDragTaskId);
+            }
+            
+            touchDragTaskId = null;
+            touchMoved = false;
+        }
+
+        function handleCardClick(e, taskId) {
+            if (touchMoved) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            // On desktop, clicking the card opens the menu
+            if (window.matchMedia('(pointer: fine)').matches) {
+                showTaskMenu(e, taskId);
+            }
+        }
+
+        // Desktop Drag & Drop
+        function handleDragStart(e, taskId) {
+            const currentBoard = getCurrentBoard();
+            draggedTask = currentBoard.tasks.find(t => t.id === taskId);
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.column-content').forEach(col => {
+                col.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e, columnId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const currentBoard = getCurrentBoard();
+            if (draggedTask && draggedTask.column !== columnId) {
+                draggedTask.column = columnId;
+                saveData();
+                renderBoard();
+            }
+            draggedTask = null;
+        }
+
+        // Task Modal
+        function openModal(columnId = 'todo') {
+            currentTaskId = null;
+            const isBlocky = appData.theme === 'blocky';
+            document.getElementById('taskModalTitle').textContent = isBlocky ? 'NUEVA TAREA' : 'Nueva Tarea';
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('taskColumn').value = columnId;
+            document.getElementById('taskModal').classList.add('active');
+            document.getElementById('taskTitle').focus();
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.remove('active');
+            currentTaskId = null;
+        }
+
+        function saveTask() {
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const column = document.getElementById('taskColumn').value;
+            const currentBoard = getCurrentBoard();
+            const isBlocky = appData.theme === 'blocky';
+
+            if (!title) {
+                alert(isBlocky ? 'EL TITULO ES OBLIGATORIO' : 'El título es obligatorio');
+                return;
+            }
+
+            if (!currentBoard) {
+                alert(isBlocky ? 'SELECCIONA UN TABLERO PRIMERO' : 'Selecciona un tablero primero');
+                return;
+            }
+
+            if (currentTaskId) {
+                const task = currentBoard.tasks.find(t => t.id === currentTaskId);
+                if (task) {
+                    task.title = title;
+                    task.description = description;
+                    task.column = column;
+                }
+            } else {
+                currentBoard.tasks.push({
+                    id: generateId(),
+                    title,
+                    description,
+                    column,
+                    createdAt: new Date().toISOString()
+                });
+            }
+
+            saveData();
+            renderBoard();
+            closeTaskModal();
+        }
+
+        // Context menu
+        function showTaskMenu(e, taskId) {
+            e.stopPropagation();
+            currentTaskId = taskId;
+            
+            const menu = document.getElementById('contextMenu');
+            const x = e.pageX || e.clientX;
+            const y = e.pageY || e.clientY;
+            
+            menu.style.left = Math.min(x, window.innerWidth - 180) + 'px';
+            menu.style.top = Math.min(y, window.innerHeight - 100) + 'px';
+            menu.classList.add('active');
+        }
+
+        function hideContextMenu() {
+            document.getElementById('contextMenu').classList.remove('active');
+        }
+
+        function editTask() {
+            const currentBoard = getCurrentBoard();
+            if (!currentBoard) return;
+            
+            const task = currentBoard.tasks.find(t => t.id === currentTaskId);
+            if (task) {
+                const isBlocky = appData.theme === 'blocky';
+                document.getElementById('taskModalTitle').textContent = isBlocky ? 'EDITAR TAREA' : 'Editar Tarea';
+                document.getElementById('taskTitle').value = task.title;
+                document.getElementById('taskDescription').value = task.description || '';
+                document.getElementById('taskColumn').value = task.column;
+                document.getElementById('taskModal').classList.add('active');
+            }
+            hideContextMenu();
+        }
+
+        function deleteTask() {
+            const currentBoard = getCurrentBoard();
+            if (!currentBoard) return;
+            const isBlocky = appData.theme === 'blocky';
+            
+            if (confirm(isBlocky ? '¿ELIMINAR ESTA TAREA?' : '¿Eliminar esta tarea?')) {
+                currentBoard.tasks = currentBoard.tasks.filter(t => t.id !== currentTaskId);
+                saveData();
+                renderBoard();
+            }
+            hideContextMenu();
+        }
+
+        // Sidebar
+        function openSidebar() {
+            document.getElementById('sidebarOverlay').classList.add('active');
+            document.getElementById('sidebar').classList.add('active');
+            renderBoardList();
+            updateThemeToggle();
+            updateTexts();
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.getElementById('sidebar').classList.remove('active');
+        }
+
+        function renderBoardList() {
+            const list = document.getElementById('boardList');
+            const isBlocky = appData.theme === 'blocky';
+            const icon = isBlocky ? '[K]' : '📋';
+            const editIcon = isBlocky ? '[E]' : '✏️';
+            const deleteIcon = isBlocky ? '[D]' : '🗑️';
+            
+            list.innerHTML = appData.boards.map(board => `
+                <div class="board-item ${board.id === appData.currentBoardId ? 'active' : ''}" 
+                     onclick="switchBoard('${board.id}')">
+                    <div class="board-item-name">
+                        <span>${icon}</span>
+                        <span>${escapeHtml(isBlocky ? board.name.toUpperCase().replace(/\s+/g, '-') : board.name)}</span>
+                    </div>
+                    <div class="board-item-actions">
+                        <button class="btn-small" onclick="renameBoard(event, '${board.id}')">${editIcon}</button>
+                        <button class="btn-small" onclick="deleteBoard(event, '${board.id}')">${deleteIcon}</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Board operations
+        function switchBoard(boardId) {
+            appData.currentBoardId = boardId;
+            saveData();
+            updateBoardSelector();
+            renderBoard();
+            renderBoardList();
+        }
+
+        function createNewBoard() {
+            boardModalMode = 'create';
+            boardModalTargetId = null;
+            const isBlocky = appData.theme === 'blocky';
+            document.getElementById('boardModalTitle').textContent = isBlocky ? 'NUEVO TABLERO' : 'Nuevo Tablero';
+            document.getElementById('boardNameInput').value = '';
+            document.getElementById('boardModal').classList.add('active');
+            document.getElementById('boardNameInput').focus();
+        }
+
+        function renameBoard(e, boardId) {
+            e.stopPropagation();
+            const board = appData.boards.find(b => b.id === boardId);
+            if (!board) return;
+            
+            boardModalMode = 'rename';
+            boardModalTargetId = boardId;
+            const isBlocky = appData.theme === 'blocky';
+            document.getElementById('boardModalTitle').textContent = isBlocky ? 'RENOMBRAR TABLERO' : 'Renombrar Tablero';
+            document.getElementById('boardNameInput').value = isBlocky ? 
+                board.name.toUpperCase().replace(/\s+/g, '-') : 
+                board.name;
+            document.getElementById('boardModal').classList.add('active');
+            document.getElementById('boardNameInput').focus();
+        }
+
+        function renameCurrentBoard() {
+            closeSidebar();
+            renameBoard({ stopPropagation: () => {} }, appData.currentBoardId);
+        }
+
+        function saveBoardName() {
+            let name = document.getElementById('boardNameInput').value.trim();
+            const isBlocky = appData.theme === 'blocky';
+            
+            if (!name) {
+                alert(isBlocky ? 'EL NOMBRE ES OBLIGATORIO' : 'El nombre es obligatorio');
+                return;
+            }
+
+            if (isBlocky) {
+                name = name.toUpperCase().replace(/\s+/g, '-');
+            }
+
+            if (boardModalMode === 'create') {
+                const newBoard = {
+                    id: generateId(),
+                    name: name,
+                    tasks: []
+                };
+                appData.boards.push(newBoard);
+                appData.currentBoardId = newBoard.id;
+            } else {
+                const board = appData.boards.find(b => b.id === boardModalTargetId);
+                if (board) {
+                    board.name = name;
+                }
+            }
+
+            saveData();
+            updateBoardSelector();
+            renderBoard();
+            if (document.getElementById('sidebar').classList.contains('active')) {
+                renderBoardList();
+            }
+            closeBoardModal();
+        }
+
+        function deleteBoard(e, boardId) {
+            e.stopPropagation();
+            const isBlocky = appData.theme === 'blocky';
+            
+            if (appData.boards.length <= 1) {
+                alert(isBlocky ? 'DEBES TENER AL MENOS UN TABLERO' : 'Debes tener al menos un tablero');
+                return;
+            }
+            
+            const board = appData.boards.find(b => b.id === boardId);
+            const confirmMsg = isBlocky ? 
+                `¿ELIMINAR EL TABLERO "${board.name.toUpperCase().replace(/\s+/g, '-')}"?` :
+                `¿Eliminar el tablero "${board.name}"?`;
+            
+            if (!confirm(confirmMsg)) return;
+            
+            appData.boards = appData.boards.filter(b => b.id !== boardId);
+            
+            if (appData.currentBoardId === boardId) {
+                appData.currentBoardId = appData.boards[0].id;
+            }
+            
+            saveData();
+            updateBoardSelector();
+            renderBoard();
+            renderBoardList();
+        }
+
+        function deleteCurrentBoard() {
+            closeSidebar();
+            deleteBoard({ stopPropagation: () => {} }, appData.currentBoardId);
+        }
+
+        function updateBoardSelector() {
+            const currentBoard = getCurrentBoard();
+            const isBlocky = appData.theme === 'blocky';
+            if (currentBoard) {
+                document.getElementById('currentBoardName').textContent = isBlocky ? 
+                    currentBoard.name.toUpperCase().replace(/\s+/g, '-') : 
+                    currentBoard.name;
+            } else {
+                document.getElementById('currentBoardName').textContent = isBlocky ? 'SELECCIONAR' : 'Seleccionar';
+            }
+        }
+
+        function closeBoardModal() {
+            document.getElementById('boardModal').classList.remove('active');
+            boardModalMode = 'create';
+            boardModalTargetId = null;
+        }
+
+        // Export/Import
+        function exportData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `kanban-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            closeSidebar();
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const isBlocky = appData.theme === 'blocky';
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    
+                    if (!imported.boards || !Array.isArray(imported.boards) || imported.boards.length === 0) {
+                        throw new Error('Formato invalido');
+                    }
+                    
+                    const confirmMsg = isBlocky ?
+                        `¿IMPORTAR ${imported.boards.length} TABLERO(S)? ESTO REEMPLAZARA TODOS TUS DATOS.` :
+                        `¿Importar ${imported.boards.length} tablero(s)? Esto reemplazará todos tus datos actuales.`;
+                    
+                    if (confirm(confirmMsg)) {
+                        appData = imported;
+                        if (!appData.currentBoardId || !appData.boards.find(b => b.id === appData.currentBoardId)) {
+                            appData.currentBoardId = appData.boards[0].id;
+                        }
+                        if (!appData.theme) appData.theme = 'modern';
+                        saveData();
+                        applyTheme(appData.theme);
+                        updateBoardSelector();
+                        renderBoard();
+                        alert(isBlocky ? 'DATOS IMPORTADOS CORRECTAMENTE' : 'Datos importados correctamente');
+                    }
+                } catch (err) {
+                    alert(isBlocky ? 'ERROR AL IMPORTAR: ARCHIVO INVALIDO' : 'Error al importar: archivo inválido');
+                }
+                document.getElementById('importFile').value = '';
+            };
+            reader.readAsText(file);
+            closeSidebar();
+        }
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', renderBoard);
+
+        // Close modals
+        document.getElementById('taskModal').addEventListener('click', (e) => {
+            if (e.target.id === 'taskModal') closeTaskModal();
+        });
+
+        document.getElementById('boardModal').addEventListener('click', (e) => {
+            if (e.target.id === 'boardModal') closeBoardModal();
+        });
+
+        // Close context menu
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.context-menu') && !e.target.closest('.card-menu')) {
+                hideContextMenu();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeTaskModal();
+                closeBoardModal();
+                closeSidebar();
+                hideContextMenu();
+            }
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
