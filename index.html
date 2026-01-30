@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mi Kanban</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <style>
         /* ============================================
            CSS VARIABLES - THEME SYSTEM
@@ -14,7 +17,7 @@
         :root {
             --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
-            
+
             --bg-primary: #f5f5f5;
             --bg-secondary: #ffffff;
             --bg-column: #f0f0f0;
@@ -24,16 +27,16 @@
             --border-color: #e0e0e0;
             --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
-            
+
             --radius: 8px;
             --radius-sm: 4px;
             --radius-card: 4px;
-            
+
             --header-height: 60px;
             --column-width: 300px;
             --card-padding: 14px;
             --board-gap: 16px;
-            
+
             --todo-dot: #666666;
             --progress-dot: #3b82f6;
             --review-dot: #f59e0b;
@@ -43,7 +46,7 @@
 
         [data-theme="blocky"] {
             --font-main: 'JetBrains Mono', 'Courier New', monospace;
-            
+
             --bg-primary: #fafafa;
             --bg-secondary: #ffffff;
             --bg-column: #f5f5f5;
@@ -53,16 +56,16 @@
             --border-color: #000000;
             --shadow: none;
             --shadow-hover: none;
-            
+
             --radius: 0px;
             --radius-sm: 0px;
             --radius-card: 0px;
-            
+
             --header-height: 50px;
             --column-width: 280px;
             --card-padding: 12px;
             --board-gap: 0px;
-            
+
             --todo-dot: #000000;
             --progress-dot: #0066cc;
             --review-dot: #cc8800;
@@ -77,7 +80,8 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             overflow: hidden;
         }
@@ -513,11 +517,25 @@
             border-radius: 0;
         }
 
-        .column-dot.todo { background-color: var(--todo-dot); }
-        .column-dot.progress { background-color: var(--progress-dot); }
-        .column-dot.review { background-color: var(--review-dot); }
-        .column-dot.done { background-color: var(--done-dot); }
-        .column-dot.cancelled { background-color: var(--cancelled-dot); }
+        .column-dot.todo {
+            background-color: var(--todo-dot);
+        }
+
+        .column-dot.progress {
+            background-color: var(--progress-dot);
+        }
+
+        .column-dot.review {
+            background-color: var(--review-dot);
+        }
+
+        .column-dot.done {
+            background-color: var(--done-dot);
+        }
+
+        .column-dot.cancelled {
+            background-color: var(--cancelled-dot);
+        }
 
         .column-count {
             font-size: 11px;
@@ -1324,7 +1342,9 @@
            MOBILE RESPONSIVE
            ============================================ */
         @media (max-width: 768px) {
-            html, body {
+
+            html,
+            body {
                 height: auto;
                 overflow: auto;
             }
@@ -1465,6 +1485,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="main-container">
         <div class="content-wrapper">
@@ -1524,7 +1545,7 @@
                     <button class="theme-option" id="themeBlocky" onclick="setTheme('blocky')">Blocky</button>
                 </div>
             </div>
-            
+
             <div class="sidebar-section">
                 <div class="sidebar-section-title" id="dataSectionTitle">Datos</div>
                 <div class="menu-item" onclick="exportData()">
@@ -1566,7 +1587,8 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" id="labelDesc">Descripción</label>
-                    <textarea class="form-textarea" id="taskDescription" placeholder="Descripción detallada..."></textarea>
+                    <textarea class="form-textarea" id="taskDescription"
+                        placeholder="Descripción detallada..."></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label" id="labelColumn">Columna</label>
@@ -1608,12 +1630,7 @@
 
     <!-- Context Menu -->
     <div class="context-menu" id="contextMenu">
-        <div class="context-menu-item" onclick="editTask()">
-            <span id="ctxIconEdit">✏️</span> <span id="ctxTextEdit">Editar</span>
-        </div>
-        <div class="context-menu-item danger" onclick="deleteTask()">
-            <span id="ctxIconDelete">🗑️</span> <span id="ctxTextDelete">Eliminar</span>
-        </div>
+        <!-- Dynamic content generated by JS -->
     </div>
 
     <script>
@@ -1701,7 +1718,7 @@
         function updateThemeToggle() {
             const modernBtn = document.getElementById('themeModern');
             const blockyBtn = document.getElementById('themeBlocky');
-            
+
             if (appData.theme === 'blocky') {
                 modernBtn.classList.remove('active');
                 blockyBtn.classList.add('active');
@@ -1713,18 +1730,18 @@
 
         function updateTexts() {
             const isBlocky = appData.theme === 'blocky';
-            
+
             // Header icons
             document.getElementById('logoIcon').textContent = isBlocky ? '[K]' : '📋';
             document.getElementById('logoArrow').textContent = isBlocky ? '_' : '▼';
             document.getElementById('btnNew').textContent = isBlocky ? '[+]' : '+';
             document.getElementById('btnMenu').textContent = isBlocky ? '[#]' : '☰';
-            
+
             // Dropdown
             document.getElementById('dropdownHeader').textContent = isBlocky ? 'MIS TABLEROS' : 'Mis Tableros';
             document.getElementById('dropdownAddIcon').textContent = isBlocky ? '[+]' : '+';
             document.getElementById('dropdownAddText').textContent = isBlocky ? 'NUEVO TABLERO' : 'Nuevo tablero';
-            
+
             // Sidebar
             document.getElementById('sidebarTitle').textContent = isBlocky ? 'MENU' : 'Menú';
             document.getElementById('btnCloseSidebar').textContent = isBlocky ? '[X]' : '✕';
@@ -1739,7 +1756,7 @@
             document.getElementById('textRename').textContent = isBlocky ? 'RENOMBRAR' : 'Renombrar tablero';
             document.getElementById('iconDelete').textContent = isBlocky ? '[D]' : '🗑️';
             document.getElementById('textDelete').textContent = isBlocky ? 'ELIMINAR' : 'Eliminar tablero';
-            
+
             // Modals
             document.getElementById('btnCloseTask').textContent = isBlocky ? '[X]' : '✕';
             document.getElementById('btnCloseBoard').textContent = isBlocky ? '[X]' : '✕';
@@ -1751,21 +1768,21 @@
             document.getElementById('labelDesc').textContent = isBlocky ? 'DESCRIPCION' : 'Descripción';
             document.getElementById('labelColumn').textContent = isBlocky ? 'COLUMNA' : 'Columna';
             document.getElementById('labelBoardName').textContent = isBlocky ? 'NOMBRE DEL TABLERO' : 'Nombre del tablero';
-            
+
             // Context menu
             document.getElementById('ctxIconEdit').textContent = isBlocky ? '[E]' : '✏️';
             document.getElementById('ctxTextEdit').textContent = isBlocky ? 'EDITAR' : 'Editar';
             document.getElementById('ctxIconDelete').textContent = isBlocky ? '[D]' : '🗑️';
             document.getElementById('ctxTextDelete').textContent = isBlocky ? 'ELIMINAR' : 'Eliminar';
-            
+
             // Update board selector
             const currentBoard = getCurrentBoard();
             if (currentBoard) {
-                document.getElementById('currentBoardName').textContent = isBlocky ? 
-                    currentBoard.name.toUpperCase().replace(/\s+/g, '-') : 
+                document.getElementById('currentBoardName').textContent = isBlocky ?
+                    currentBoard.name.toUpperCase().replace(/\s+/g, '-') :
                     currentBoard.name;
             }
-            
+
             // Update search placeholder
             document.getElementById('searchInput').placeholder = isBlocky ? 'buscar...' : 'Buscar tareas...';
         }
@@ -1799,7 +1816,7 @@
             const icon = isBlocky ? '[K]' : '📋';
             const editIcon = isBlocky ? '[E]' : '✏️';
             const deleteIcon = isBlocky ? '[D]' : '🗑️';
-            
+
             list.innerHTML = appData.boards.map(board => `
                 <div class="board-dropdown-item ${board.id === appData.currentBoardId ? 'active' : ''}" 
                      onclick="switchBoardFromDropdown('${board.id}')">
@@ -1831,31 +1848,31 @@
         function renameBoardFromDropdown(e, boardId) {
             e.stopPropagation();
             closeBoardDropdown();
-            renameBoard({ stopPropagation: () => {} }, boardId);
+            renameBoard({ stopPropagation: () => { } }, boardId);
         }
 
         function deleteBoardFromDropdown(e, boardId) {
             e.stopPropagation();
             const isBlocky = appData.theme === 'blocky';
-            
+
             if (appData.boards.length <= 1) {
                 alert(isBlocky ? 'DEBES TENER AL MENOS UN TABLERO' : 'Debes tener al menos un tablero');
                 return;
             }
-            
+
             const board = appData.boards.find(b => b.id === boardId);
-            const confirmMsg = isBlocky ? 
+            const confirmMsg = isBlocky ?
                 `¿ELIMINAR EL TABLERO "${board.name.toUpperCase().replace(/\s+/g, '-')}"?` :
                 `¿Eliminar el tablero "${board.name}"?`;
-            
+
             if (!confirm(confirmMsg)) return;
-            
+
             appData.boards = appData.boards.filter(b => b.id !== boardId);
-            
+
             if (appData.currentBoardId === boardId) {
                 appData.currentBoardId = appData.boards[0].id;
             }
-            
+
             saveData();
             updateBoardSelector();
             renderBoard();
@@ -1875,7 +1892,7 @@
         // Setup horizontal scroll with mouse wheel
         function setupHorizontalScroll() {
             const boardWrapper = document.getElementById('boardWrapper');
-            
+
             boardWrapper.addEventListener('wheel', (e) => {
                 if (window.innerWidth > 768) {
                     if (e.deltaY !== 0) {
@@ -1893,24 +1910,24 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const isBlocky = appData.theme === 'blocky';
             const cols = isBlocky ? columnsBlocky : columns;
-            
+
             if (!currentBoard) {
                 board.innerHTML = `<div class="empty-state">${isBlocky ? 'SELECCIONA O CREA UN TABLERO' : 'Selecciona o crea un tablero'}</div>`;
                 return;
             }
 
             board.innerHTML = cols.map(col => {
-                const colTasks = currentBoard.tasks.filter(t => 
-                    t.column === col.id && 
-                    (t.title.toLowerCase().includes(searchTerm) || 
-                     (t.description && t.description.toLowerCase().includes(searchTerm)))
+                const colTasks = currentBoard.tasks.filter(t =>
+                    t.column === col.id &&
+                    (t.title.toLowerCase().includes(searchTerm) ||
+                        (t.description && t.description.toLowerCase().includes(searchTerm)))
                 );
-                
+
                 const btnAdd = isBlocky ? '[+]' : '+';
                 const btnMenu = isBlocky ? '[_]' : '⋯';
                 const emptyText = isBlocky ? 'SIN TAREAS' : 'Sin tareas';
                 const addText = isBlocky ? 'AÑADIR TAREA' : 'Añadir tarea';
-                
+
                 return `
                     <div class="column" data-column="${col.id}">
                         <div class="column-header">
@@ -1927,10 +1944,10 @@
                              ondrop="handleDrop(event, '${col.id}')" 
                              ondragover="handleDragOver(event)"
                              ondragleave="handleDragLeave(event)">
-                            ${colTasks.length === 0 ? 
-                                `<div class="empty-state">${emptyText}</div>` : 
-                                colTasks.map(task => createCardHTML(task, btnMenu)).join('')
-                            }
+                            ${colTasks.length === 0 ?
+                        `<div class="empty-state">${emptyText}</div>` :
+                        colTasks.map(task => createCardHTML(task, btnMenu)).join('')
+                    }
                         </div>
                         <button class="add-card-btn" onclick="openModal('${col.id}')">
                             <span>${btnAdd}</span> ${addText}
@@ -1982,12 +1999,12 @@
 
         function handleTouchEnd(e) {
             if (!touchDragTaskId) return;
-            
+
             if (!touchMoved) {
                 const touch = e.changedTouches[0];
-                showTaskMenu({ stopPropagation: () => {}, pageX: touch.pageX, pageY: touch.pageY }, touchDragTaskId);
+                showTaskMenu({ stopPropagation: () => { }, pageX: touch.pageX, pageY: touch.pageY }, touchDragTaskId);
             }
-            
+
             touchDragTaskId = null;
             touchMoved = false;
         }
@@ -2030,7 +2047,7 @@
         function handleDrop(e, columnId) {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over');
-            
+
             const currentBoard = getCurrentBoard();
             if (draggedTask && draggedTask.column !== columnId) {
                 draggedTask.column = columnId;
@@ -2100,14 +2117,87 @@
         function showTaskMenu(e, taskId) {
             e.stopPropagation();
             currentTaskId = taskId;
-            
+
+            const currentBoard = getCurrentBoard();
+            const task = currentBoard.tasks.find(t => t.id === taskId);
+            if (!task) return;
+
             const menu = document.getElementById('contextMenu');
+            const isBlocky = appData.theme === 'blocky';
+
+            // Helper for column titles
+            const getColTitle = (id) => {
+                const cols = isBlocky ? columnsBlocky : columns;
+                const col = cols.find(c => c.id === id);
+                return col ? col.title : id;
+            };
+
+            // Determine move options
+            const colIds = columns.map(c => c.id);
+            const currentIndex = colIds.indexOf(task.column);
+            const prevCol = currentIndex > 0 ? colIds[currentIndex - 1] : null;
+            const nextCol = currentIndex < colIds.length - 1 ? colIds[currentIndex + 1] : null;
+
+            // Generate HTML
+            let menuHtml = '';
+
+            // Move Options
+            if (prevCol) {
+                const icon = isBlocky ? '[<]' : '⬅️';
+                const label = isBlocky ? ('MOVER A ' + getColTitle(prevCol)) : ('Mover a ' + getColTitle(prevCol));
+                menuHtml += `
+                    <div class="context-menu-item" onclick="moveTaskTo('${prevCol}')">
+                        <span class="menu-icon">${icon}</span> <span>${label}</span>
+                    </div>`;
+            }
+            if (nextCol) {
+                const icon = isBlocky ? '[>]' : '➡️';
+                const label = isBlocky ? ('MOVER A ' + getColTitle(nextCol)) : ('Mover a ' + getColTitle(nextCol));
+                menuHtml += `
+                    <div class="context-menu-item" onclick="moveTaskTo('${nextCol}')">
+                        <span class="menu-icon">${icon}</span> <span>${label}</span>
+                    </div>`;
+            }
+
+            // Divider
+            if (prevCol || nextCol) {
+                menuHtml += `<div style="height:1px; background:var(--border-color); margin:4px 0;"></div>`;
+            }
+
+            // Standard Options
+            const editIcon = isBlocky ? '[E]' : '✏️';
+            const deleteIcon = isBlocky ? '[D]' : '🗑️';
+            const editVerify = isBlocky ? 'EDITAR' : 'Editar'; // Using verify just as a var name suffix
+            const deleteVerify = isBlocky ? 'ELIMINAR' : 'Eliminar';
+
+            menuHtml += `
+                <div class="context-menu-item" onclick="editTask()">
+                    <span id="ctxIconEdit">${editIcon}</span> <span id="ctxTextEdit">${editVerify}</span>
+                </div>
+                <div class="context-menu-item danger" onclick="deleteTask()">
+                    <span id="ctxIconDelete">${deleteIcon}</span> <span id="ctxTextDelete">${deleteVerify}</span>
+                </div>
+            `;
+
+            menu.innerHTML = menuHtml;
+
             const x = e.pageX || e.clientX;
             const y = e.pageY || e.clientY;
-            
-            menu.style.left = Math.min(x, window.innerWidth - 180) + 'px';
-            menu.style.top = Math.min(y, window.innerHeight - 100) + 'px';
+
+            menu.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+            menu.style.top = Math.min(y, window.innerHeight - 200) + 'px';
             menu.classList.add('active');
+        }
+
+        function moveTaskTo(targetColId) {
+            const currentBoard = getCurrentBoard();
+            const task = currentBoard.tasks.find(t => t.id === currentTaskId);
+            if (task) {
+                task.column = targetColId;
+                saveData();
+                renderBoard();
+            }
+            hideContextMenu();
         }
 
         function hideContextMenu() {
@@ -2117,7 +2207,7 @@
         function editTask() {
             const currentBoard = getCurrentBoard();
             if (!currentBoard) return;
-            
+
             const task = currentBoard.tasks.find(t => t.id === currentTaskId);
             if (task) {
                 const isBlocky = appData.theme === 'blocky';
@@ -2134,7 +2224,7 @@
             const currentBoard = getCurrentBoard();
             if (!currentBoard) return;
             const isBlocky = appData.theme === 'blocky';
-            
+
             if (confirm(isBlocky ? '¿ELIMINAR ESTA TAREA?' : '¿Eliminar esta tarea?')) {
                 currentBoard.tasks = currentBoard.tasks.filter(t => t.id !== currentTaskId);
                 saveData();
@@ -2178,13 +2268,13 @@
             e.stopPropagation();
             const board = appData.boards.find(b => b.id === boardId);
             if (!board) return;
-            
+
             boardModalMode = 'rename';
             boardModalTargetId = boardId;
             const isBlocky = appData.theme === 'blocky';
             document.getElementById('boardModalTitle').textContent = isBlocky ? 'RENOMBRAR TABLERO' : 'Renombrar Tablero';
-            document.getElementById('boardNameInput').value = isBlocky ? 
-                board.name.toUpperCase().replace(/\s+/g, '-') : 
+            document.getElementById('boardNameInput').value = isBlocky ?
+                board.name.toUpperCase().replace(/\s+/g, '-') :
                 board.name;
             document.getElementById('boardModal').classList.add('active');
             document.getElementById('boardNameInput').focus();
@@ -2192,13 +2282,13 @@
 
         function renameCurrentBoard() {
             closeSidebar();
-            renameBoard({ stopPropagation: () => {} }, appData.currentBoardId);
+            renameBoard({ stopPropagation: () => { } }, appData.currentBoardId);
         }
 
         function saveBoardName() {
             let name = document.getElementById('boardNameInput').value.trim();
             const isBlocky = appData.theme === 'blocky';
-            
+
             if (!name) {
                 alert(isBlocky ? 'EL NOMBRE ES OBLIGATORIO' : 'El nombre es obligatorio');
                 return;
@@ -2233,25 +2323,25 @@
         function deleteBoard(e, boardId) {
             e.stopPropagation();
             const isBlocky = appData.theme === 'blocky';
-            
+
             if (appData.boards.length <= 1) {
                 alert(isBlocky ? 'DEBES TENER AL MENOS UN TABLERO' : 'Debes tener al menos un tablero');
                 return;
             }
-            
+
             const board = appData.boards.find(b => b.id === boardId);
-            const confirmMsg = isBlocky ? 
+            const confirmMsg = isBlocky ?
                 `¿ELIMINAR EL TABLERO "${board.name.toUpperCase().replace(/\s+/g, '-')}"?` :
                 `¿Eliminar el tablero "${board.name}"?`;
-            
+
             if (!confirm(confirmMsg)) return;
-            
+
             appData.boards = appData.boards.filter(b => b.id !== boardId);
-            
+
             if (appData.currentBoardId === boardId) {
                 appData.currentBoardId = appData.boards[0].id;
             }
-            
+
             saveData();
             updateBoardSelector();
             renderBoard();
@@ -2260,15 +2350,15 @@
 
         function deleteCurrentBoard() {
             closeSidebar();
-            deleteBoard({ stopPropagation: () => {} }, appData.currentBoardId);
+            deleteBoard({ stopPropagation: () => { } }, appData.currentBoardId);
         }
 
         function updateBoardSelector() {
             const currentBoard = getCurrentBoard();
             const isBlocky = appData.theme === 'blocky';
             if (currentBoard) {
-                document.getElementById('currentBoardName').textContent = isBlocky ? 
-                    currentBoard.name.toUpperCase().replace(/\s+/g, '-') : 
+                document.getElementById('currentBoardName').textContent = isBlocky ?
+                    currentBoard.name.toUpperCase().replace(/\s+/g, '-') :
                     currentBoard.name;
             } else {
                 document.getElementById('currentBoardName').textContent = isBlocky ? 'SELECCIONAR' : 'Seleccionar';
@@ -2286,7 +2376,7 @@
             const dataStr = JSON.stringify(appData, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             const a = document.createElement('a');
             a.href = url;
             a.download = `kanban-backup-${new Date().toISOString().split('T')[0]}.json`;
@@ -2294,7 +2384,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             closeSidebar();
         }
 
@@ -2306,20 +2396,20 @@
             const file = e.target.files[0];
             if (!file) return;
             const isBlocky = appData.theme === 'blocky';
-            
+
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 try {
                     const imported = JSON.parse(event.target.result);
-                    
+
                     if (!imported.boards || !Array.isArray(imported.boards) || imported.boards.length === 0) {
                         throw new Error('Formato invalido');
                     }
-                    
+
                     const confirmMsg = isBlocky ?
                         `¿IMPORTAR ${imported.boards.length} TABLERO(S)? ESTO REEMPLAZARA TODOS TUS DATOS.` :
                         `¿Importar ${imported.boards.length} tablero(s)? Esto reemplazará todos tus datos actuales.`;
-                    
+
                     if (confirm(confirmMsg)) {
                         appData = imported;
                         if (!appData.currentBoardId || !appData.boards.find(b => b.id === appData.currentBoardId)) {
@@ -2376,4 +2466,5 @@
         init();
     </script>
 </body>
+
 </html>
