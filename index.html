@@ -195,20 +195,73 @@
         }
 
         /* Blocky Dark - Card Hover Overrides */
-        [data-theme="blocky"][data-color-scheme="dark"] .card:hover {
+        /* Card turns green ONLY if we are not hovering the menu button */
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover:not(:has(.card-menu:hover)) {
             background-color: #00ff00 !important;
             border-color: #00ff00 !important;
             box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
         }
 
-        [data-theme="blocky"][data-color-scheme="dark"] .card:hover .card-title,
-        [data-theme="blocky"][data-color-scheme="dark"] .card:hover .card-description,
-        [data-theme="blocky"][data-color-scheme="dark"] .card:hover .card-menu {
+        /* Text turns black ONLY if card is green */
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover:not(:has(.card-menu:hover)) .card-title,
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover:not(:has(.card-menu:hover)) .card-description {
             color: #000000 !important;
         }
 
-        [data-theme="blocky"][data-color-scheme="dark"] .card:hover .card-menu {
+        /* Menu button hint (dark green) when card is hovered */
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover:not(:has(.card-menu:hover)) .card-menu {
+            color: #006600 !important;
+            border-color: #006600 !important;
+        }
+
+        /* Blocky Dark - Add Card Button Hover */
+        [data-theme="blocky"][data-color-scheme="dark"] .add-card-btn:hover {
+            background-color: #00ff00 !important;
+            color: #000000 !important;
+            border-color: #00ff00 !important;
+        }
+
+        /* Blocky Dark - Menu and Context Menu Hover */
+        /* Menu button turns bright green when hovered directly */
+        [data-theme="blocky"][data-color-scheme="dark"] .card-menu:hover,
+        [data-theme="blocky"][data-color-scheme="dark"] .context-menu-item:hover {
+            background-color: #00ff00 !important;
+            color: #000000 !important;
             border-color: #000000 !important;
+            opacity: 1 !important;
+        }
+
+        /* Blocky Dark - Form Controls Visibility */
+        [data-theme="blocky"][data-color-scheme="dark"] .form-input,
+        [data-theme="blocky"][data-color-scheme="dark"] .form-textarea,
+        [data-theme="blocky"][data-color-scheme="dark"] .form-select {
+            color: var(--text-primary);
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .form-input:focus,
+        [data-theme="blocky"][data-color-scheme="dark"] .form-textarea:focus,
+        [data-theme="blocky"][data-color-scheme="dark"] .form-select:focus {
+            border-color: #00ff00;
+        }
+
+        /* Blocky Dark - Button Themes */
+        [data-theme="blocky"][data-color-scheme="dark"] .btn-primary {
+            background-color: #000;
+            color: #00ff00;
+            border-color: #00ff00;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .btn-primary:hover {
+            background-color: #00ff00;
+            color: #000;
+            border-color: #00ff00;
+            opacity: 1;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .btn-secondary:hover {
+            background-color: #ff0000;
+            color: #000;
+            border-color: #ff0000;
         }
 
 
@@ -784,12 +837,12 @@
             border-bottom-width: 2px;
         }
 
-        .card:hover {
+        .card:hover:not(:has(.card-menu:hover)) {
             box-shadow: var(--shadow-hover);
             border-color: var(--text-primary);
         }
 
-        [data-theme="blocky"] .card:hover {
+        [data-theme="blocky"] .card:hover:not(:has(.card-menu:hover)) {
             background-color: #f0f0f0;
         }
 
