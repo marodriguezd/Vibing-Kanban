@@ -194,6 +194,23 @@
             background-color: #004400;
         }
 
+        /* Blocky Dark - Card Hover Overrides */
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover {
+            background-color: #00ff00 !important;
+            border-color: #00ff00 !important;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover .card-title,
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover .card-description,
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover .card-menu {
+            color: #000000 !important;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .card:hover .card-menu {
+            border-color: #000000 !important;
+        }
+
 
         .mobile-only {
             display: none !important;
