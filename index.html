@@ -73,6 +73,110 @@
             --cancelled-dot: #cc0000;
         }
 
+        /* ============================================
+           DARK THEME - MODERN
+           ============================================ */
+        [data-theme="modern"][data-color-scheme="dark"] {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-column: #151515;
+            --text-primary: #e5e5e5;
+            --text-secondary: #a0a0a0;
+            --text-muted: #707070;
+            --border-color: #2a2a2a;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+            --todo-dot: #888888;
+            --progress-dot: #5b9eff;
+            --review-dot: #ffb347;
+            --done-dot: #4ade80;
+            --cancelled-dot: #f87171;
+        }
+
+        /* Modern Dark - Button and Icon Color Overrides */
+        [data-theme="modern"][data-color-scheme="dark"] .btn-icon {
+            color: #e5e5e5;
+        }
+
+        [data-theme="modern"][data-color-scheme="dark"] .btn-icon:hover {
+            background-color: #2a2a2a;
+            border-color: #5b9eff;
+        }
+
+        [data-theme="modern"][data-color-scheme="dark"] .search-box::before {
+            color: #e5e5e5;
+        }
+
+        [data-theme="modern"][data-color-scheme="dark"] .search-box input {
+            color: #e5e5e5;
+        }
+
+        [data-theme="modern"][data-color-scheme="dark"] .search-box input::placeholder {
+            color: #707070;
+        }
+
+        [data-theme="modern"][data-color-scheme="dark"] .board-selector {
+            color: #e5e5e5;
+        }
+
+        [data-theme="modern"][data-color-scheme="dark"] .board-selector-arrow {
+            color: #707070;
+        }
+
+
+        /* ============================================
+           DARK THEME - BLOCKY
+           ============================================ */
+        [data-theme="blocky"][data-color-scheme="dark"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-column: #0f0f0f;
+            --text-primary: #00ff00;
+            --text-secondary: #00cc00;
+            --text-muted: #008800;
+            --border-color: #00ff00;
+            --shadow: none;
+            --shadow-hover: none;
+
+            --todo-dot: #00ff00;
+            --progress-dot: #00ccff;
+            --review-dot: #ffcc00;
+            --done-dot: #00ff00;
+            --cancelled-dot: #ff0000;
+        }
+
+        /* Blocky Dark - Button and Icon Color Overrides */
+        [data-theme="blocky"][data-color-scheme="dark"] .btn-icon {
+            color: #00ff00;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .btn-icon:hover {
+            background-color: #00ff00;
+            color: #000000;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .search-box::before {
+            color: #00ff00;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .search-box input {
+            color: #00ff00;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .search-box input::placeholder {
+            color: #008800;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .board-selector {
+            color: #00ff00;
+        }
+
+        [data-theme="blocky"][data-color-scheme="dark"] .board-selector-arrow {
+            color: #008800;
+        }
+
+
         .mobile-only {
             display: none !important;
         }
@@ -1608,6 +1712,14 @@
             </div>
 
             <div class="sidebar-section">
+                <div class="sidebar-section-title" id="colorSchemeSectionTitle">Esquema de Color</div>
+                <div class="theme-toggle">
+                    <button class="theme-option" id="colorSchemeLight" onclick="setColorScheme('light')">Claro</button>
+                    <button class="theme-option" id="colorSchemeDark" onclick="setColorScheme('dark')">Oscuro</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
                 <div class="sidebar-section-title" id="dataSectionTitle">Datos</div>
                 <div class="menu-item" onclick="exportData()">
                     <span class="menu-item-icon" id="iconExport">📤</span>
@@ -1722,7 +1834,8 @@
                 }
             ],
             currentBoardId: 'default',
-            theme: 'modern'
+            theme: 'modern',
+            colorScheme: 'light'
         };
 
         let appData = null;
@@ -1737,7 +1850,8 @@
         // Initialize
         function init() {
             loadData();
-            applyTheme(appData.theme || 'modern');
+            applyTheme(appData.theme || 'modern', appData.colorScheme || 'light');
+            updateThemeToggle();
             renderBoard();
             updateBoardSelector();
             renderBoardDropdown();
@@ -1772,27 +1886,47 @@
         function setTheme(theme) {
             appData.theme = theme;
             saveData();
-            applyTheme(theme);
+            applyTheme(theme, appData.colorScheme);
             updateThemeToggle();
             renderBoard();
             renderBoardDropdown();
             updateTexts();
         }
 
-        function applyTheme(theme) {
+        function setColorScheme(scheme) {
+            appData.colorScheme = scheme;
+            saveData();
+            applyTheme(appData.theme, scheme);
+            updateThemeToggle();
+        }
+
+        function applyTheme(theme, colorScheme) {
             document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.setAttribute('data-color-scheme', colorScheme || 'light');
         }
 
         function updateThemeToggle() {
             const modernBtn = document.getElementById('themeModern');
             const blockyBtn = document.getElementById('themeBlocky');
+            const lightBtn = document.getElementById('colorSchemeLight');
+            const darkBtn = document.getElementById('colorSchemeDark');
 
+            // Update theme buttons
             if (appData.theme === 'blocky') {
                 modernBtn.classList.remove('active');
                 blockyBtn.classList.add('active');
             } else {
                 modernBtn.classList.add('active');
                 blockyBtn.classList.remove('active');
+            }
+
+            // Update color scheme buttons
+            if (appData.colorScheme === 'dark') {
+                lightBtn.classList.remove('active');
+                darkBtn.classList.add('active');
+            } else {
+                lightBtn.classList.add('active');
+                darkBtn.classList.remove('active');
             }
         }
 
