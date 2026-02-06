@@ -1974,7 +1974,11 @@
 
             boardWrapper.addEventListener('wheel', (e) => {
                 if (window.innerWidth > 768) {
-                    if (e.deltaY !== 0) {
+                    // Check if the wheel event is happening over a column-content element
+                    const isOverColumnContent = e.target.closest('.column-content');
+
+                    // Only convert vertical to horizontal scroll if NOT over column content
+                    if (!isOverColumnContent && e.deltaY !== 0) {
                         e.preventDefault();
                         boardWrapper.scrollLeft += e.deltaY;
                     }
