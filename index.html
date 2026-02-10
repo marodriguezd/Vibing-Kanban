@@ -782,6 +782,22 @@
             color: #fff;
         }
 
+        .btn-sort {
+            position: relative;
+        }
+
+        .btn-sort.active {
+            background-color: var(--progress-dot);
+            color: white;
+            border-color: var(--progress-dot);
+        }
+
+        [data-theme="blocky"] .btn-sort.active {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
         .column-content {
             flex: 1;
             overflow-y: auto;
@@ -1440,6 +1456,77 @@
         }
 
         /* ============================================
+           COLUMN SORT DROPDOWN
+           ============================================ */
+        .column-sort-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background-color: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-hover);
+            padding: 6px 0;
+            min-width: 160px;
+            z-index: 102;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+            transition: all 0.15s;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="blocky"] .column-sort-dropdown {
+            border-width: 2px;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        .column-sort-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .column-sort-item {
+            padding: 10px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.15s;
+        }
+
+        [data-theme="blocky"] .column-sort-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        [data-theme="blocky"] .column-sort-item:last-child {
+            border-bottom: none;
+        }
+
+        .column-sort-item:hover {
+            background-color: var(--bg-primary);
+        }
+
+        [data-theme="blocky"] .column-sort-item:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .column-sort-item.selected {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--progress-dot);
+            font-weight: 600;
+        }
+
+        [data-theme="blocky"] .column-sort-item.selected {
+            background-color: #000;
+            color: #fff;
+        }
+
+        /* ============================================
            THEME TOGGLE
            ============================================ */
         .theme-toggle {
@@ -1954,9 +2041,58 @@
         function loadData() {
             const saved = localStorage.getItem('kanban-data');
             if (saved) {
-                appData = JSON.parse(saved);
+                try {
+                    appData = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Failed to parse data', e);
+                    appData = JSON.parse(JSON.stringify(defaultData));
+                }
             } else {
                 appData = JSON.parse(JSON.stringify(defaultData));
+            }
+            migrateData();
+        }
+
+        // Migrate existing data to include new fields
+        function migrateData() {
+            let migrated = false;
+
+            appData.boards.forEach(board => {
+                // Add columnSortSettings if missing
+                if (!board.columnSortSettings) {
+                    board.columnSortSettings = {
+                        'todo': 'newest-first',
+                        'progress': 'newest-first',
+                        'review': 'newest-first',
+                        'done': 'newest-first',
+                        'cancelled': 'newest-first'
+                    };
+                    migrated = true;
+                }
+
+                // Ensure all sort modes exist
+                const columns = ['todo', 'progress', 'review', 'done', 'cancelled'];
+                columns.forEach(colId => {
+                    if (!board.columnSortSettings[colId]) {
+                        board.columnSortSettings[colId] = 'newest-first';
+                        migrated = true;
+                    }
+                });
+
+                // Add createdAt and position to tasks if missing
+                board.tasks.forEach((task, index) => {
+                    if (!task.createdAt) {
+                        task.createdAt = new Date().toISOString();
+                        migrated = true;
+                    }
+                    if (task.position === undefined) {
+                        task.position = index;
+                        migrated = true;
+                    }
+                });
+            });
+
+            if (migrated) {
                 saveData();
             }
         }
@@ -2218,16 +2354,21 @@
             }
 
             board.innerHTML = cols.map(col => {
-                const colTasks = currentBoard.tasks.filter(t =>
+                let colTasks = currentBoard.tasks.filter(t =>
                     t.column === col.id &&
                     (t.title.toLowerCase().includes(searchTerm) ||
                         (t.description && t.description.toLowerCase().includes(searchTerm)))
                 );
 
+                colTasks = sortTasksForColumn(colTasks, col.id);
+
                 const btnAdd = isBlocky ? '[+]' : '+';
                 const btnMenu = isBlocky ? '[_]' : '⋯';
+                const btnSort = isBlocky ? '[↓]' : '↓';
                 const emptyText = isBlocky ? 'SIN TAREAS' : 'Sin tareas';
                 const addText = isBlocky ? 'AÑADIR TAREA' : 'Añadir tarea';
+                const sortMode = currentBoard.columnSortSettings?.[col.id] || 'newest-first';
+                const isSortActive = sortMode !== 'newest-first';
 
                 return `
                     <div class="column" data-column="${col.id}">
@@ -2238,11 +2379,25 @@
                                 <span class="column-count">${colTasks.length}</span>
                             </div>
                             <div class="column-actions">
+                                <div style="position: relative;">
+                                    <button class="btn-column-action btn-sort ${isSortActive ? 'active' : ''}" onclick="toggleColumnSort('${col.id}', event)" title="${isBlocky ? 'ORDENAR' : 'Ordenar'}">${btnSort}</button>
+                                    <div class="column-sort-dropdown" id="sort-dropdown-${col.id}">
+                                        <div class="column-sort-item ${sortMode === 'newest-first' ? 'selected' : ''}" onclick="setColumnSort('${col.id}', 'newest-first')">
+                                            <span>${isBlocky ? 'MAS RECIENTES' : 'Más recientes primero'}</span>
+                                        </div>
+                                        <div class="column-sort-item ${sortMode === 'oldest-first' ? 'selected' : ''}" onclick="setColumnSort('${col.id}', 'oldest-first')">
+                                            <span>${isBlocky ? 'MAS ANTIGUAS' : 'Más antiguas primero'}</span>
+                                        </div>
+                                        <div class="column-sort-item ${sortMode === 'manual' ? 'selected' : ''}" onclick="setColumnSort('${col.id}', 'manual')">
+                                            <span>${isBlocky ? 'MANUAL' : 'Manual'}</span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <button class="btn-column-action" onclick="openModal('${col.id}')">${btnAdd}</button>
                             </div>
                         </div>
-                        <div class="column-content" 
-                             ondrop="handleDrop(event, '${col.id}')" 
+                        <div class="column-content"
+                             ondrop="handleDrop(event, '${col.id}')"
                              ondragover="handleDragOver(event)"
                              ondragleave="handleDragLeave(event)">
                             ${colTasks.length === 0 ?
@@ -2286,6 +2441,79 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // Sort tasks for a column based on sort setting
+        function sortTasksForColumn(tasks, columnId) {
+            const currentBoard = getCurrentBoard();
+            if (!currentBoard) return tasks;
+
+            const sortMode = currentBoard.columnSortSettings?.[columnId] || 'newest-first';
+
+            if (sortMode === 'manual') {
+                return [...tasks].sort((a, b) => (a.position || 0) - (b.position || 0));
+            }
+
+            if (sortMode === 'newest-first') {
+                return [...tasks].sort((a, b) =>
+                    new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+                );
+            }
+
+            if (sortMode === 'oldest-first') {
+                return [...tasks].sort((a, b) =>
+                    new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+                );
+            }
+
+            return tasks;
+        }
+
+        // Toggle column sort dropdown
+        function toggleColumnSort(columnId, event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(`sort-dropdown-${columnId}`);
+            const isActive = dropdown.classList.contains('active');
+            closeAllSortDropdowns();
+            if (!isActive) {
+                dropdown.classList.add('active');
+            }
+        }
+
+        // Close all sort dropdowns
+        function closeAllSortDropdowns() {
+            document.querySelectorAll('.column-sort-dropdown').forEach(d => {
+                d.classList.remove('active');
+            });
+        }
+
+        // Set column sort mode
+        function setColumnSort(columnId, sortMode) {
+            const currentBoard = getCurrentBoard();
+            if (!currentBoard) return;
+
+            if (!currentBoard.columnSortSettings) {
+                currentBoard.columnSortSettings = {
+                    'todo': 'newest-first',
+                    'progress': 'newest-first',
+                    'review': 'newest-first',
+                    'done': 'newest-first',
+                    'cancelled': 'newest-first'
+                };
+            }
+
+            currentBoard.columnSortSettings[columnId] = sortMode;
+
+            if (sortMode === 'manual') {
+                const colTasks = currentBoard.tasks.filter(t => t.column === columnId);
+                colTasks.forEach((task, index) => {
+                    task.position = index;
+                });
+            }
+
+            saveData();
+            renderBoard();
+            closeAllSortDropdowns();
         }
 
         // Touch events
@@ -2351,11 +2579,45 @@
             e.currentTarget.classList.remove('drag-over');
 
             const currentBoard = getCurrentBoard();
-            if (draggedTask && draggedTask.column !== columnId) {
+            if (!draggedTask) return;
+
+            const isDifferentColumn = draggedTask.column !== columnId;
+            const sortMode = currentBoard.columnSortSettings?.[columnId] || 'newest-first';
+            const isManualMode = sortMode === 'manual';
+
+            if (isDifferentColumn) {
                 draggedTask.column = columnId;
-                saveData();
-                renderBoard();
+
+                if (isManualMode) {
+                    const colTasks = currentBoard.tasks.filter(t => t.column === columnId && t.id !== draggedTask.id);
+                    const maxPos = colTasks.length > 0
+                        ? Math.max(...colTasks.map(t => t.position || 0))
+                        : -1;
+                    draggedTask.position = maxPos + 1;
+                }
+            } else if (isManualMode) {
+                const dropTarget = e.target.closest('.card');
+                if (dropTarget) {
+                    const targetId = dropTarget.dataset.id;
+                    const targetTask = currentBoard.tasks.find(t => t.id === targetId);
+
+                    if (targetTask && targetTask.id !== draggedTask.id) {
+                        const colTasks = currentBoard.tasks.filter(t => t.column === columnId);
+                        const targetIndex = colTasks.findIndex(t => t.id === targetId);
+                        const draggedIndex = colTasks.findIndex(t => t.id === draggedTask.id);
+
+                        colTasks.splice(draggedIndex, 1);
+                        colTasks.splice(targetIndex, 0, draggedTask);
+
+                        colTasks.forEach((task, index) => {
+                            task.position = index;
+                        });
+                    }
+                }
             }
+
+            saveData();
+            renderBoard();
             draggedTask = null;
         }
 
@@ -2401,12 +2663,24 @@
                     task.column = column;
                 }
             } else {
+                const sortMode = currentBoard.columnSortSettings?.[column] || 'newest-first';
+                let position = undefined;
+
+                if (sortMode === 'manual') {
+                    const colTasks = currentBoard.tasks.filter(t => t.column === column);
+                    const maxPos = colTasks.length > 0
+                        ? Math.max(...colTasks.map(t => t.position || 0))
+                        : -1;
+                    position = maxPos + 1;
+                }
+
                 currentBoard.tasks.push({
                     id: generateId(),
                     title,
                     description,
                     column,
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    position
                 });
             }
 
@@ -2746,10 +3020,13 @@
             if (e.target.id === 'boardModal') closeBoardModal();
         });
 
-        // Close context menu
+        // Close context menu and sort dropdowns
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.context-menu') && !e.target.closest('.card-menu')) {
                 hideContextMenu();
+            }
+            if (!e.target.closest('.column-sort-dropdown') && !e.target.closest('.btn-sort')) {
+                closeAllSortDropdowns();
             }
         });
 
@@ -2761,6 +3038,7 @@
                 closeSidebar();
                 closeBoardDropdown();
                 hideContextMenu();
+                closeAllSortDropdowns();
             }
         });
 
