@@ -2082,7 +2082,11 @@
                 // Add createdAt and position to tasks if missing
                 board.tasks.forEach((task, index) => {
                     if (!task.createdAt) {
-                        task.createdAt = new Date().toISOString();
+                        // Assign sequential timestamps based on array position
+                        // Tasks earlier in array were created earlier (going back in time)
+                        // Space them 1 minute apart to maintain relative order
+                        const timeOffset = (board.tasks.length - 1 - index) * 60000;
+                        task.createdAt = new Date(Date.now() - timeOffset).toISOString();
                         migrated = true;
                     }
                     if (task.position === undefined) {
@@ -2455,15 +2459,25 @@
             }
 
             if (sortMode === 'newest-first') {
-                return [...tasks].sort((a, b) =>
-                    new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-                );
+                return [...tasks].sort((a, b) => {
+                    const dateDiff = new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                    // Use position as secondary sort key when dates are equal
+                    if (dateDiff === 0) {
+                        return (a.position || 0) - (b.position || 0);
+                    }
+                    return dateDiff;
+                });
             }
 
             if (sortMode === 'oldest-first') {
-                return [...tasks].sort((a, b) =>
-                    new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
-                );
+                return [...tasks].sort((a, b) => {
+                    const dateDiff = new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+                    // Use position as secondary sort key when dates are equal
+                    if (dateDiff === 0) {
+                        return (a.position || 0) - (b.position || 0);
+                    }
+                    return dateDiff;
+                });
             }
 
             return tasks;
