@@ -941,6 +941,25 @@
             font-size: 11px;
         }
 
+        .card-moved-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        [data-theme="blocky"] .card-moved-time {
+            font-size: 10px;
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-top-width: 2px;
+        }
+
         /* ============================================
            ADD CARD BUTTON
            ============================================ */
@@ -1753,6 +1772,12 @@
                 opacity: 1;
             }
 
+            .card-moved-time {
+                font-size: 10px;
+                margin-top: 4px;
+                padding-top: 4px;
+            }
+
             .add-card-btn {
                 margin: 10px;
             }
@@ -2079,16 +2104,34 @@
                     }
                 });
 
-                // Add createdAt and position to tasks if missing
+                // Migrate createdAt → movedAt with adaptive time spacing
+                const calculateOffset = (total, index) => {
+                    // Adaptive spacing based on board size
+                    if (total <= 10) return (total - 1 - index) * 3600000;      // 1 hour
+                    if (total <= 50) return (total - 1 - index) * 1800000;      // 30 minutes
+                    return (total - 1 - index) * 600000;                         // 10 minutes
+                };
+
                 board.tasks.forEach((task, index) => {
-                    if (!task.createdAt) {
-                        // Assign sequential timestamps based on array position
-                        // Tasks earlier in array were created earlier (going back in time)
-                        // Space them 1 minute apart to maintain relative order
-                        const timeOffset = (board.tasks.length - 1 - index) * 60000;
-                        task.createdAt = new Date(Date.now() - timeOffset).toISOString();
+                    // Migrate old createdAt to movedAt and remove createdAt
+                    if (task.createdAt && !task.movedAt) {
+                        const totalTasks = board.tasks.length;
+                        const taskIndex = board.tasks.indexOf(task);
+                        const offset = calculateOffset(totalTasks, taskIndex);
+                        task.movedAt = new Date(Date.now() - offset).toISOString();
+                        delete task.createdAt;
                         migrated = true;
                     }
+
+                    // Handle tasks with neither field
+                    if (!task.movedAt) {
+                        const totalTasks = board.tasks.length;
+                        const taskIndex = board.tasks.indexOf(task);
+                        const offset = calculateOffset(totalTasks, taskIndex);
+                        task.movedAt = new Date(Date.now() - offset).toISOString();
+                        migrated = true;
+                    }
+
                     if (task.position === undefined) {
                         task.position = index;
                         migrated = true;
@@ -2420,9 +2463,10 @@
         // Create card HTML
         function createCardHTML(task, menuIcon) {
             const isMobile = window.innerWidth <= 768;
+            const timeAgo = formatTimeAgo(task.movedAt);
             return `
-                <div class="card" 
-                     draggable="${!isMobile}" 
+                <div class="card"
+                     draggable="${!isMobile}"
                      data-id="${task.id}"
                      ondragstart="handleDragStart(event, '${task.id}')"
                      ondragend="handleDragEnd(event)"
@@ -2435,6 +2479,7 @@
                         <button class="card-menu" onclick="showTaskMenu(event, '${task.id}')">${menuIcon}</button>
                     </div>
                     ${task.description ? `<div class="card-description">${escapeHtml(task.description)}</div>` : ''}
+                    ${timeAgo ? `<div class="card-moved-time">${timeAgo}</div>` : ''}
                 </div>
             `;
         }
@@ -2445,6 +2490,34 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // Format timestamp as "X time ago"
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return '';
+
+            const now = new Date();
+            const moved = new Date(timestamp);
+            const diffMs = now - moved;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            const isBlocky = appData.theme === 'blocky';
+
+            if (diffMins < 1) return isBlocky ? '[>]' : '⏱ Just now';
+            if (diffMins < 60) return isBlocky
+                ? `[>] ${diffMins}M`
+                : `⏱ ${diffMins}m ago`;
+            if (diffHours < 24) return isBlocky
+                ? `[>] ${diffHours}H`
+                : `⏱ ${diffHours}h ago`;
+            if (diffDays < 7) return isBlocky
+                ? `[>] ${diffDays}D`
+                : `⏱ ${diffDays}d ago`;
+
+            const date = moved.toLocaleDateString();
+            return isBlocky ? `[>] ${date.toUpperCase()}` : `⏱ ${date}`;
         }
 
         // Sort tasks for a column based on sort setting
@@ -2460,7 +2533,7 @@
 
             if (sortMode === 'newest-first') {
                 return [...tasks].sort((a, b) => {
-                    const dateDiff = new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+                    const dateDiff = new Date(b.movedAt || 0) - new Date(a.movedAt || 0);
                     // Use position as secondary sort key when dates are equal
                     if (dateDiff === 0) {
                         return (a.position || 0) - (b.position || 0);
@@ -2471,7 +2544,7 @@
 
             if (sortMode === 'oldest-first') {
                 return [...tasks].sort((a, b) => {
-                    const dateDiff = new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+                    const dateDiff = new Date(a.movedAt || 0) - new Date(b.movedAt || 0);
                     // Use position as secondary sort key when dates are equal
                     if (dateDiff === 0) {
                         return (a.position || 0) - (b.position || 0);
@@ -2601,6 +2674,7 @@
 
             if (isDifferentColumn) {
                 draggedTask.column = columnId;
+                draggedTask.movedAt = new Date().toISOString();
 
                 if (isManualMode) {
                     const colTasks = currentBoard.tasks.filter(t => t.column === columnId && t.id !== draggedTask.id);
@@ -2674,7 +2748,10 @@
                 if (task) {
                     task.title = title;
                     task.description = description;
-                    task.column = column;
+                    if (task.column !== column) {
+                        task.column = column;
+                        task.movedAt = new Date().toISOString();
+                    }
                 }
             } else {
                 const sortMode = currentBoard.columnSortSettings?.[column] || 'newest-first';
@@ -2693,7 +2770,7 @@
                     title,
                     description,
                     column,
-                    createdAt: new Date().toISOString(),
+                    movedAt: new Date().toISOString(),
                     position
                 });
             }
@@ -2782,8 +2859,9 @@
         function moveTaskTo(targetColId) {
             const currentBoard = getCurrentBoard();
             const task = currentBoard.tasks.find(t => t.id === currentTaskId);
-            if (task) {
+            if (task && task.column !== targetColId) {
                 task.column = targetColId;
+                task.movedAt = new Date().toISOString();
                 saveData();
                 renderBoard();
             }
